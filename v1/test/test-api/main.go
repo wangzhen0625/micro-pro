@@ -7,17 +7,17 @@ import (
 
 	"github.com/micro/go-micro"
 	"github.com/micro/go-micro/errors"
+	_ "github.com/micro/go-plugins/registry/etcdv3"
 	api "github.com/micro/micro/api/proto"
-	hello "micro-pro/v1/test/test-srv/hello"
-
 	"golang.org/x/net/context"
+	hello "micro-pro/v1/test/test-srv/hello"
 )
 
 type Say struct {
 	Client hello.SayClient
 }
 
-func (s *Say) Hello(ctx context.Context, req *api.Request, rsp *api.Response) error {
+func (s *Say) SayHello(ctx context.Context, req *api.Request, rsp *api.Response) error {
 	log.Print("Received Say.Hello API request")
 
 	name, ok := req.Get["name"]

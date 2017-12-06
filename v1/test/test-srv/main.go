@@ -5,15 +5,16 @@ import (
 	"time"
 
 	"github.com/micro/go-micro"
-	hello "micro-pro/v1/test/test-srv/hello"
-
+	_ "github.com/micro/go-plugins/registry/etcdv3"
 	"golang.org/x/net/context"
+	hello "micro-pro/v1/test/test-srv/hello"
 )
 
 type Say struct{}
 
 func (s *Say) SayHello(ctx context.Context, req *hello.Request, rsp *hello.Response) error {
 	log.Print("Received Say.Hello request")
+
 	rsp.Msg = "Hello " + req.Name
 	return nil
 }
