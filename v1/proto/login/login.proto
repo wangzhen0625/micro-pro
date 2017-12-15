@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package go.micro.srv.v1.login;
+
+service Login {
+	rpc UserPwdLogin(Request) returns (Response) {}
+	rpc CheckAuth(Request) returns (Response) {}
+	rpc GetAdminInfo(Request) returns (Response) {}
+}
+
+message Request {
+	string name = 1;
+	string password = 2;
+}
+
+message Response {
+	string msg = 1;
+}

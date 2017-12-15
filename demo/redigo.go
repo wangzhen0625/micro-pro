@@ -9,7 +9,7 @@ import (
 // This example implements ZPOP as described at
 // http://redis.io/topics/transactions using WATCH/MULTI/EXEC and scripting.
 func main() {
-	c, err := redis.Dial("tcp", "192.168.74.50:6379")
+	c, err := redis.Dial("tcp", "192.168.74.84:6379")
 	if err != nil {
 		fmt.Println(err)
 		return
