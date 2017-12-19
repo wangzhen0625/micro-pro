@@ -41,7 +41,7 @@ func (l *Login) UserPwdLogin(req *restful.Request, rsp *restful.Response) {
 	claims.ExpiresAt = end   //exp生命周期
 	claims.Id = "16"         //jti 用户ID
 	claims.IssuedAt = now    //iat token创建时间
-	claims.Issuer = "wz"     //iss jwt的签发者
+	claims.Issuer = "wz"     //iss jwt的签发者11
 	claims.NotBefore = now   //nbf  开始生效的时间
 	claims.Subject = "name"  //sub JWT所面向的用户
 
