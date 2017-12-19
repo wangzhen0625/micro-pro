@@ -41,7 +41,7 @@ func (l *Login) UserPwdLogin(req *restful.Request, rsp *restful.Response) {
 	claims.ExpiresAt = end   //exp生命周期
 	claims.Id = "16"         //jti 用户ID
 	claims.IssuedAt = now    //iat token创建时间
-	claims.Issuer = "topsec" //iss jwt的签发者
+	claims.Issuer = "wz"     //iss jwt的签发者
 	claims.NotBefore = now   //nbf  开始生效的时间
 	claims.Subject = "name"  //sub JWT所面向的用户
 
@@ -49,7 +49,7 @@ func (l *Login) UserPwdLogin(req *restful.Request, rsp *restful.Response) {
 	claims.LoginTime = now
 	claims.LoginIp = "192.168.74.50"
 
-	SecretKey := "TOPSEC_GW_2017"
+	SecretKey := "WZ_2017"
 	token.Claims = claims
 
 	tokenString, _ := token.SignedString([]byte(SecretKey))
