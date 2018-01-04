@@ -1,32 +1,32 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/garyburd/redigo/redis"
+	"log"
+	"time"
 )
+
+var redisConn redis.Conn
 
 // This example implements ZPOP as described at
 // http://redis.io/topics/transactions using WATCH/MULTI/EXEC and scripting.
 func main() {
-	c, err := redis.Dial("tcp", "192.168.74.84:6379")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer c.Close()
+	var err error
+	redisConn, err = redis.Dial("tcp", "192.168.74.84:6379")
 
-	v, err := c.Do("SET", "name", "red")
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal(err)
 	}
-	fmt.Println(v)
-	v, err = redis.String(c.Do("GET", "a"))
-	if err != nil {
-		fmt.Println(err)
-		return
+	count := 10000
+	defer redisConn.Close()
+	for i := 0; i < count; i++ {
+		go doRedis(i)
 	}
-	fmt.Println(v)
 
+	time.Sleep(10 * time.Second)
+
+}
+
+func doRedis(i int) {
+	redisConn.Do("PUBLISH", "wz", i)
 }
