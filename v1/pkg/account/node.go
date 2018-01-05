@@ -2,7 +2,13 @@ package account
 
 import (
 	"github.com/emicklei/go-restful"
+	"golang.org/x/net/context"
 	"log"
+	accPt "micro-pro/v1/proto/account"
+)
+
+var (
+	acl accPt.AccountClient
 )
 
 type LiAttr struct {
@@ -33,21 +39,27 @@ func (n *node) NodeIndex(req *restful.Request, rsp *restful.Response) {
 	log.Print("node index")
 
 	nodePId := req.QueryParameter("parentId")
-	// nodeguid := req.QueryParameter("guid")
-	// nodeType := req.QueryParameter("type")
-	liattr := LiAttr{Guid: "3", Type: "organization"}
+	nodeguid := req.QueryParameter("guid")
+	nodeType := req.QueryParameter("type")
 	if nodePId == "" {
 		nodePId = "#"
-		rsp.WriteEntity(User{Children: true, Id: "3", Liattr: liattr, Parent: "#", Text: "topsec", Type: "organization"})
-
-	} else {
-		rsp.WriteEntity(User{})
-
 	}
+	response, err := acl.NodeIndex(context.TODO(), &accPt.NodeReq{
+		ParentId: nodePId,
+		Guid:     nodeguid,
+		Type:     nodeType,
+	})
+
+	if err != nil {
+		rsp.WriteError(500, err)
+	}
+
+	rsp.WriteEntity(response)
 }
 func (n *node) NodeRead(req *restful.Request, rsp *restful.Response) {
+	liattr := LiAttr{Guid: "3", Type: "organization"}
 	log.Print("Received Rest.Test API request")
-	rsp.WriteEntity(User{})
+	rsp.WriteEntity(User{Children: true, Id: "3", Liattr: liattr, Parent: "#", Text: "topsec", Type: "organization"})
 }
 func (n *node) NodeSave(req *restful.Request, rsp *restful.Response) {
 	log.Print("Received Rest.Test API request")

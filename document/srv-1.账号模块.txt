@@ -1,1 +1,1 @@
-srv-1.账号模块.txt
+account

@@ -1,3 +1,5 @@
+protoc --go_out=plugins=micro:. greeter.proto
+
 项目目录：
 	binaryfile:存放编译好的二进制文件
 	demo:保存一些例子
