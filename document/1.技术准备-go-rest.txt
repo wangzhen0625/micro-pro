@@ -1,0 +1,56 @@
+https://github.com/emicklei/go-restful
+
+先定义结构体，然后数据都通过结构体操作
+实例地址
+	https://github.com/emicklei/go-restful/blob/master/examples/restful-user-resource.go
+
+Path			Service					Service Path
+/foo/bar		go.micro.api.foo		/foo/bar
+/greeter		go.micro.api.greeter	/greeter
+/greeter/:name	go.micro.api.greeter	/greeter/:name
+
+/v1/test		go.micro.api.v1.test	/test
+
+
+
+ws.Path("/v1/rest")和web.Name("go.micro.api.v1.rest")必须一致
+
+
+ReadEntity获取form提交的参数
+
+WriteEntity将结构体返回到页面
+
+PathParameter 解析请求路径的参数
+
+name := req.QueryParameter("name")  ip/aa?name=xx  
+pid := req.QueryParameter("pid")  /userPwdLogin/{pid}/test/{id}
+test, _ := req.BodyParameter("name")  ???
+test2 := req.HeaderParameter("name") 头信息
+
+WriteHeader 修改响应头
+
+因为代码强制使用json，所以请求需要指定头信息：headers={'content-type': 'application/json'}
+
+默认的ajax请求是application/x-www-form-urlencoded，可以传对象。
+但是application/json只能跟字符串
+contentType: "application/json; charset=utf-8",
+data:JSON.stringify(data),
+
+
+func (self UserResource) FindUsersByName(response restful.ResponseBuilder, name restful.QueryParam) {
+    users := []User{} // select from User where name  = ?
+    response.StatusOK()
+    response.AddHeader(restful.HeaderLastModified, time.Now().Add(time.Duration(1000)))
+    response.Entity(users)
+}
+
+
+w.AddHeader("Location", u.Path+"/"+k.Encode())
+
+// Return the resultant entity.
+w.WriteHeader(http.StatusCreated)
+w.WriteEntity(p)
+
+
+
+

@@ -1,13 +1,84 @@
+项目目录：
+	binaryfile:存放编译好的二进制文件
+	demo:保存一些例子
+	document:保存项目文档
+	notes:保存期间用到的知识笔记
+	plugins:保存服务发现等相关的插件代码
+	v1/api:处理请求的服务
+	v1/srv:为api服务提供 系统和数据库相关的服务
+	v1/web:测试api的页面demo
+
+
+
 项目架构：
 web -(RESTful)-> 
 	micro api(将http请求转换成rpc请求) -->api(类似控制层访问srv使用rpc) -->srv（类似模型层，专注操作数据库）
 
 
 服务发现使用etcd3
+网关：micro api
+服务：api*
+数据库操作：srv*
+
+
+开发环境：192.168.74.50
+	安装golang
+	下载etcd源码
+	下载micro相关代码
+	下载protoc相关工具
+
+
+运行环境：
+	不需要搭建go环境
+
+二进制文生成
+	etcd二进制文件   
+		./etcd
+	micro二进制文件
+		./micro --registry=etcdv3 --registry_address=127.0.0.1:2379 api
+		如果使用rest：
+		micro --registry=etcdv3 --registry_address=127.0.0.1:2379 api --handler=proxy
+	api和srv的一系列二进制文件
+		./api --registry=etcdv3 --registry_address=127.0.0.1:2379
+		./srv  --registry=etcdv3 --registry_address=127.0.0.1:2379
+
+0、服务发现插件
+在micro-pro/plugins/下添加服务发现的代码
+默认使用consul，现在改成etcdv3，则需要添加etcdv3.go文件来引入etcdv3
+etcdv3.go
+	package main
+	import _ "github.com/micro/go-plugins/registry/etcdv3"
+将文件复制到下面需要的目录下（因为编译需要文件在同一目录下）	
+
+1、etcd：
+	go get -u -v github.com/coreos/etcd
+	(如果失败，就到github上直接下载移动到指定目录：src/github.com/coreos/etcd/)
+	cd etcd;./build;
+
+2、micro（micro api）
+	cd /Golang/src/github.com/micro/micro 
+	go build -i -o micro ./main.go ./etcdv3.go
+		
+
+3、api和srv (名字和目录一致)
+	cd /Golang/src/micro-pro/v1/test/test-api
+	go build -i -o rest ./rest.go ./etcdv3.go 
+
+	cd /Golang/src/micro-pro/v1/test/test-srv
+	go build -i -o srv ./main.go ./etcdv3.go
+
+		
+
+项目使用rest接口，micro api将前端请求转换成rest接口给api*，api*还是通过rpc访问srv*
+
+etcd（服务发现）和micro api（路由代理）作为项目基础：
+./etcd
+./micro --registry=etcdv3 --registry_address=127.0.0.1:2379 api --handler=proxy
 
 
 
-
+所以项目中只需要修改新增控制器rest-api和数据库操作模型srv即可
+	
 
 
 
