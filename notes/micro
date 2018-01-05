@@ -1,0 +1,50 @@
+
+1、go-micro安装
+yum install initscripts 
+
+wget https://releases.hashicorp.com/consul/1.0.0/consul_1.0.0_linux_amd64.zip
+unzip consul_1.0.0_linux_amd64.zip
+mv consul /usr/local
+mkdir /opt/consul
+./consul agent -dev -ui -node=consul-dev -client=127.0.0.1 &
+
+
+go get -v -u github.com/micro/go-micro
+go get github.com/micro/protobuf/{proto,protoc-gen-go}
+go get github.com/micro/micro
+go get github.com/micro/examples/greeter/srv && srv &
+
+--registry=mdns
+micro list services 
+micro get service go.micro.srv.greeter 
+micro query go.micro.srv.greeter Say.Hello '{"name": "John"}' 
+
+
+2、grpc网关安装
+yum install autoconf automake libtool  gcc-c++
+yum -y install gcc automake autoconf libtool make
+mkdir tmp
+cd tmp
+git clone https://github.com/google/protobuf
+cd protobuf
+./autogen.sh
+./configure
+make && make check && make install
+
+
+Install plugins
+
+go get -u -v github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+go get -u -v github.com/micro/protobuf/protoc-gen-go
+
+
+proto使用以下命令生成grpc存根和反向代理
+protoc -I/usr/local/include -I.  -I$GOPATH/src  -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis  --go_out=plugins=grpc:.  path/to/your_service.proto
+	
+protoc -I/usr/local/include -I.  -I$GOPATH/src  -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis  --grpc-gateway_out=logtostderr=true:.  path/to/your_service.proto
+
+
+
+
+
+

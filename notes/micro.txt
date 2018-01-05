@@ -1,0 +1,75 @@
+type Service interface {
+    Init(...Option)
+    Options() Options
+    Client() client.Client
+    Server() server.Server
+    Run() error
+    String() string
+}
+
+1、初始化
+main.go
+
+import "github.com/micro/go-micro"
+service := micro.NewService() 
+
+
+2、定义 service api 接口的proto文件
+//服务处理程序service handler :Greeter；对应的方法method ：Hello
+syntax = "proto3";
+service Greeter {
+	rpc Hello(HelloRequest) returns (HelloResponse) {}
+}
+message HelloRequest {
+	string name = 1;
+}
+message HelloResponse {
+	string greeting = 2;
+}
+3、使用proto工具生成service api 接口的go语言实现
+
+
+4、实现服务处理程序handler
+handler签名：
+type GreeterHandler interface {
+        Hello(context.Context, *HelloRequest, *HelloResponse) error
+}
+Greeter处理程序的实现
+import proto "github.com/micro/examples/service/proto"
+
+type Greeter struct{}
+
+func (g *Greeter) Hello(ctx context.Context, req *proto.HelloRequest, rsp *proto.HelloResponse) error {
+	rsp.Greeting = "Hello " + req.Name
+	return nil
+}
+
+Greeter处理程序的注册
+proto.RegisterGreeterHandler(service.Server(), new(Greeter))
+
+
+5、启动服务
+if err := service.Run(); err != nil {
+	log.Fatal(err)
+}
+
+6、客户端
+// create the greeter client using the service name and client
+greeter := proto.NewGreeterClient("greeter", service.Client())
+
+// request the Hello method on the Greeter handler
+rsp, err := greeter.Hello(context.TODO(), &proto.HelloRequest{
+	Name: "John",
+})
+if err != nil {
+	fmt.Println(err)
+	return
+}
+
+fmt.Println(rsp.Greeter)
+
+
+
+
+
+

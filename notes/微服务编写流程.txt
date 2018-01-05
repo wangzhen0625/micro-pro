@@ -1,0 +1,152 @@
+yum install autoconf automake libtool gcc-c++ gcc make unzip git
+mkdir tmp2
+cd tmp2
+git clone https://github.com/google/protobuf
+cd protobuf
+./autogen.sh
+./configure&&make&&make install
+
+vim plugins.go
+{
+package main
+import _ "github.com/micro/go-plugins/registry/etcdv3"
+}
+
+
+micro api
+cd /Golang/src/github.com/micro/examples/greeter/
+{
+go build -i -o micro ./main.go ./plugins.go
+go install
+后台运行
+micro --registry=etcdv3 --registry_address=127.0.0.1:2379 api &
+}
+
+api
+cd /Golang/src/github.com/micro/examples/greeter/api
+{
+go build -i -o test-api ./main.go ./plugins.go;go install (名字和目录一致)
+后台运行
+api --registry=etcdv3 --registry_address=127.0.0.1:2379 &
+}
+
+srv
+cd /Golang/src/github.com/micro/examples/greeter/srv
+{
+go build -i -o srv ./main.go ./plugins.go;go install
+
+后台运行
+srv  --registry=etcdv3 --registry_address=127.0.0.1:2379 &
+}
+
+先说RPC协议-远程过程调用
+通过网络从远程计算机程序上请求服务
+RPC采用客户机/服务器模式。请求程序就是一个客户机，而服务提供程序就是一个服务器。
+在OSI网络通信模型中，
+RPC跨越了传输层和应用层。RPC使得开发包括网络分布式多程序在内的应用程序更加容易
+OSI网络通信模型：
+{
+应用层：程序间通信   http
+表示层：处理数据格式
+会话层：维护管理会话
+传输层：建立主机连接	tcp、udp协议
+网络层：寻址路由		ip协议
+数据链路层
+物理层
+}
+
+开发流程：
+{
+1、新建一个protobuf
+定义一个服务greeter，有一个普通api sayhello
+使用protoc生成对应的go文件
+
+2、服务端
+定义一个server结构，然后实现SayHello的接口
+然后调用NewServer() 创建一个server ,
+RegisterGreeterServer注册这个server到结构server上面 
+
+3、客户端
+这里通过NewGreeterClient()传入一个conn创建一个client，然后直接调用client上面对应的服务器的接口	
+}
+{
+proto
+service Say {
+	rpc Hello(Request) returns (Response) {}
+}
+
+
+service
+type Say struct{}
+func (s *Say) Hello(ctx context.Context, req *hello.Request, rsp *hello.Response) error {
+	log.Print("Received Say.Hello request")
+	rsp.Msg = "Hello " + req.Name
+	return nil
+}
+
+service := micro.NewService()
+hello.RegisterSayHandler(service.Server(), new(Say))
+
+client
+type Say struct {
+	Client hello.SayClient
+}
+
+service.Server().Handle(
+		service.Server().NewHandler(
+			&Say{Client: hello.NewSayClient("go.micro.srv.greeter", service.Client())},
+		),
+	)
+	
+}
+
+{
+uri								api										srv service.api
+/foo/bar					go.micro.api.foo			Foo.Bar
+/v1/foo/bar				go.micro.api.v1.foo		Foo.Bar
+/v2/foo/bar				go.micro.api.v2.foo		Foo.Bar
+
+/foo/bar/baz			go.micro.api.foo			Bar.Baz
+/v1/foo/bar/baz		go.micro.api.v1.foo		Bar.Baz
+/v2/foo/bar/baz		go.micro.api.v2.foo		Bar.Baz
+
+/foo/bar/baz/cat	go.micro.api.foo.bar	Baz.Cat
+
+http://192.168.74.50:8080/greeter/say/hello?name=John
+api:greeter
+
+rest 
+/foo/bar	go.micro.api.foo	/foo/bar
+/greeter	go.micro.api.greeter	/greeter
+/greeter/:name	go.micro.api.greeter	/greeter/:name
+
+
+micro api
+	用户可以通过uri
+	
+greeter-api
+	go.micro.api.greeter
+greeter-srv	
+	go.micro.srv.greeter
+
+
+etcd
+micro --registry=etcdv3 --registry_address=127.0.0.1:2379 api &
+api --registry=etcdv3 --registry_address=127.0.0.1:2379 &
+srv  --registry=etcdv3 --registry_address=127.0.0.1:2379 &	
+}
+
+protoc --go_out=plugins=micro:. hi.proto
+3、mysql
+{
+	
+	
+}
+
+
+
+
+
+
+
+

@@ -1,0 +1,31 @@
+http://blog.csdn.net/bbdxf
+
+https://micro.mu/docs/api.html
+https://micro.mu/docs/deploy-kubernetes.html
+介绍：
+	Micro是微服务生态系统。 目的是简化分布式系统开发。提供管理微服务环境所需的基本工具
+
+	如果你想开始写微服务器，直接去go-micro repo ：https://github.com/micro/go-micro
+概述：
+	Micro是一个微服务工具包。提供主要的软件。
+	该工具包（toolkit）包含以下组件：
+		注意：Go-micro是一个库，可以独立于其他工具包使用。
+		
+工具集：https://github.com/micro/micro
+微服务：https://github.com/micro/go-micro
+例子:https://github.com/micro/examples
+
+
+
+
+
+Go-Micro是基于Go-Kit来做的，并且被它强力推荐的一套微服务框架。它集合了服务发现、Web、API、CLI、Bot、Slack等功能与一体，有N多插件方便其他RPC或者通信协议与之集成。几乎可以说，有它在手，别无它求！ 哈哈哈，有点过了，但确实是很全面，把微服务可能遇到的问题都考虑全了，值得拥有！
+
+1、Go-kit
+	将自己描述为微服务的标准库。像Go一样，go-kit为您提供可用于构建应用程序的各种包。Go-kit是您想要完全控制您如何定义服务的理想选择。
+2、Go-micro
+	是微服务的可插拔RPC框架。
+3、Micro
+	是一个微服务工具包。这就像一个微服务的瑞士军刀，它搭载在go-micro上，提供传统的入口点，如http api网关，web ui，cli，slack bot等。
+
+使用go-kit，您需要完全控制。使用go-micro ，你会有一个有意思的框架。

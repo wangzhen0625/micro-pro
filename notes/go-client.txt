@@ -1,0 +1,21 @@
+https://godoc.org/github.com/micro/go-micro/client
+客户端软件包用于查询服务。 创建服务时，将包含与服务器使用的初始化包匹配的客户端。
+
+查询上述服务与以下内容一样简单。
+// create the greeter client using the service name and client
+greeter := proto.NewGreeterClient("greeter", service.Client())
+
+// request the Hello method on the Greeter handler
+rsp, err := greeter.Hello(context.TODO(), &proto.HelloRequest{
+	Name: "John",
+})
+if err != nil {
+	fmt.Println(err)
+	return
+}
+
+fmt.Println(rsp.Greeter)
+
+proto.NewGreeterClient接收用于发出请求的服务名称和客户端。
+
+完整的例子可以在go-micro / examples / service中找到。

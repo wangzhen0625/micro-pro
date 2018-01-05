@@ -1,0 +1,328 @@
+https://micro.mu/blog/2016/03/20/micro.html
+https://micro.mu/blog/2016/04/18/micro-architecture.html
+https://github.com/micro
+
+1、Micro是一个专注于简化分布式系统开发的微服务生态系统。
+
+	go-micro - A pluggable Go RPC framework for writing a microservice; service discovery, client/server rpc, pub/sub, etc.
+	go-plugins - Plugins for go-micro including etcd, kubernetes, nats, rabbitmq, grpc, etc.
+	micro - A microservice toolkit containing traditional entry points; API Gateway, CLI, Slack Bot, Sidecar and Web UI.
+
+2、Where do I start?
+	Start with go-micro. The readme provides a sample microservice.
+	Learn more by reading the getting started guide or checkout the examples.
+	Use the micro toolkit to access microservices via the cli, web ui, slack or api gateway.
+	
+3、怎么使用micro
+	使用go-micro编写一些services 
+	然后通过micro工具集访问他们。（api、web、cli等）
+	实例：https://github.com/micro/examples/tree/master/greeter
+	
+4、使用etcd代替consul
+		如果您想使用etcd，导入插件并在二进制文件中设置命令行标志。
+		import (
+        _ "github.com/micro/go-plugins/registry/etcd"
+		)
+		service --registry=etcd --registry_address=127.0.0.1:2379
+	
+5、哪里可以运行Micro	
+	Micro is runtime agnostic. You can run it anywhere you like. On bare metal, on AWS, Google Cloud. On your favourite container orchestration system like Mesos or Kubernetes.
+	https://github.com/micro/kubernetes
+	
+6、API，Web和SRV服务有什么区别？
+	api.exp.com->micro api -> cunstomer api -> customer srv
+	web.exp.com->micro web -> cunstomer web -> customer srv
+	将api、web页面和后端服务分离
+	API的服务由micro api提供，默认的命名空间是go.micro.api。 micro api符合API网关模式
+		https://github.com/micro/micro/tree/master/api
+	Web服务由micro web提供,默认名称空间go.micro.web。 我们相信网络应用程序作为微型服务世界中的一流公民，将微型服务的Web仪表板构建起来。 micro web是反向代理，并将基于路由到服务解析的HTTP请求转发到适当的网络应用程序。
+		https://github.com/micro/micro/tree/master/web
+	SRV服务基本上是标准的RPC服务，通常是您要编写的服务。 我们通常称之为RPC或后端服务，因为它们应该主要是后端架构的一部分，而不是面向公众。 默认情况下，我们使用命名空间go.micro.srv作为这些，但您应该使用您的域com.example.srv。
+	
+7、Micro vs Go-Kit
+Go-kit将自己描述为微服务的标准库。像Go一样，go-kit为您提供可用于构建应用程序的各种包。 Go-kit是您想要完全控制您如何定义服务的理想选择。
+Go-micro是微服务的可插拔RPC框架。 这是一个有意见的框架，其尝试简化分布式系统的通信方面，因此您可以专注于业务逻辑本身。 Go-micro是您想要快速开发和运行的好地方，同时拥有可插拔的功能，可以在没有代码更改的情况下切换基础架构。	
+Micro是一个微服务工具包。 这就像一个微软服务的瑞士军刀，它搭载在微软上，提供传统的入口点，如http api网关，web ui，cli，slack bot等。Micro使用工具来指导您的架构中的问题的逻辑分离，推动您 为公共API创建一个API层的微服务器，并为web UI单独创建一个WEB层的微服务器。
+	
+	
+8、micro简单介绍
+	工具集：	
+		Go Micro：
+			是一个可插拔的RPC框架，用于在Go中编写微服务。
+			它提供了用于服务发现，客户端负载平衡，编码，同步和异步通信的库。
+		Micro API：
+			是一个API网关或代理，用于提供HTTP并将请求路由到适当的微服务。
+			它作为单个入口点，可以用作反向代理或将HTTP请求转换为RPC。
+			它应该在基础架构的边缘运行。
+		WEB UI：
+			web版本的go-micro，微型Web应用程序的Web仪表板和反向代理。 我们认为网络应用程序应该被构建为微服务，因此被视为微服务世界中的一流公民。 它的行为与API反向代理类似，但也包括对Web套接字的支持。
+		sidecar：
+			http api版本的go-micro，实现将非go的应用整合到微服务
+			提供go-micro作为HTTP服务的所有功能。 虽然我们喜欢Go，并相信构建微服务是一种伟大的语言，但您也可能希望使用其他语言，因此Sidecar提供了将其他应用程序集成到Micro世界中的一种方法。
+		Bot：
+			A Hubot style bot that sits inside your microservices platform and can be interacted with via Slack, HipChat, XMPP, etc
+		Micro CLI
+			go-micro的命令行版本
+			一个直接的命令行界面，可与您的微服务进行交互。 您可能不想直接连接到服务注册表，它还允许您利用Sidecar作为代理。
+	8.0、go-micro（Go-micro是微服务的独立RPC框架。 它是该工具包的核心）
+		默认插件
+			consul或多播DNS用于服务发现
+			随机散列客户端负载均衡
+			用于消息编码的JSON-RPC和PROTO-RPC
+			用于通信的HTTP
+
+		broker（异步通信）
+			可插拔的异步 pub/sub 接口
+			为消息代理提供了异步 pub/sub 通信的接口
+			这是事件驱动架构和微服务的基本要求之一。
+			微服务是事件驱动的架构.
+			 By default we use an inbox style point to point HTTP system to minimise the number of dependencies required to get started. 
+			implementations include nats, rabbitmq and http (for development) in go-plugins
+		transport（同步通信）
+			可插拔的同步的消息点对点传送的接口，是服务之间的同步请求/响应通信的接口。 它类似于golang网络包，但提供了更高级别的抽象，它允许我们切换通信机制，例如http，rabbitmq，websockets，NATS。 该传输还支持双向流。 这对于客户端推送到服务器是强大的
+			Current implementations are http, rabbitmq and nats
+		codec（消息编码/解码）
+			用于将消息在传输之前编解码
+			这可能是json，protobuf，bson，msgpack等。
+			与大多数其他编解码器不同的是，我们实际上也支持这里的RPC格式。 所以我们有JSON-RPC，PROTO-RPC，BSON-RPC等。它将编码从客户端/服务器分离，并提供了集成其他系统（如gRPC, Vanadium, etc等）的强大方法
+		registry（客户端的服务发现）
+			可插拔的服务发现的库。
+			将服务的名称解析为地址，可以被consul, etcd, zookeeper, dns, gossip, etc支持
+			Current implementations are consul, etcd, memory and kubernetes. 
+		selector（节点过滤和负载平衡）
+			负载均衡。使用选择器而不是注册表registry
+			
+
+		server（RPC服务器）
+			提供构建运行中微服务的接口
+			编写服务的构建块
+			可以命名您的服务，注册请求处理程序，添加中间件等
+			该服务基于上述包，为服务请求提供统一的接口。 内置服务器是RPC系统。 在将来还有其他的实现。 服务器还允许您定义多个编解码器来提供不同的编码消息。
+			provides a way of serving RPC requests
+		client（RPC客户端）
+			提供一种RPC查询的方式
+			客户端提供了一个接口来对服务进行请求
+			像服务器一样，它建立在其他软件包上，以提供一个统一的接口，通过使用注册表的名称查找服务，使用选择器进行负载平衡，使用代理使用传输和异步消息的同步请求。
+			provides retries, timeouts, use of context, etc
+			
+		service
+			上述组件在micro的顶层组合成一个服务
+		
+		综述：broker transport codec registry selector作为go-micro的底层组件。
+			例如编写api 服务：
+				server 基于上述的组件编写如srv服务
+				client 基于上述的组件编写客户端来调用服务
+				而一对一对的server和client组合成了一个个的api service。
+				micro api来作为唯一入口解析请求来传递给对应的service，通过client访问server
+	8.1、micro api
+		将RPC请求从一个服务转到另一个服务是Go Micro非常容易实现的，但不是外部访问的理想选择。 
+		服务的实例可能会失败，它们可能在其他地方重新安排，或者最终绑定到任何随机端口。
+		API提供了一个单一的入口点来查询微服务器，应该被用作外部访问的网关。
+		micro api是微服务的API网关。 使用API网关模式为您的服务提供单个入口点。 micro api提供HTTP并动态路由到适当的后端服务。
+		micro api通过service的client来访问server来实现访问
+		8.1.1、/rpc
+			可以使用/ rpc端点通过RPC查询各个服务:
+			curl \
+				-d "service=go.micro.srv.greeter" \
+				-d "method=Say.Hello" \
+				-d "request={\"name\": \"John\"}" \
+				http://localhost:8080/rpc
+
+			{"msg":"Hello John"}
+		8.1.2 api.Request
+			API可用于细分由个人微服务提供服务的网址。 这是API组合的强大方法。 这里API使用请求路径的第一部分以及命名空间组件来确定将请求路由到的服务。 然后将HTTP请求转换为api.Request并进行适当转发。
+
+			在Micro我们使用创建API微服务的模式来服务边缘的请求。 分离后端与前端服务的责任。
+				请求：
+					GET /greeter/say/hello?name=John
+				转变成：
+					service: go.micro.api.greeter (default namespace go.micro.api is applied)
+					method: Say.Hello
+					request {
+						"method": "GET",
+						"path": "/greeter/say/hello",
+						"get": {
+							"name": "John"
+						}
+					}
+				api.Request和api.Response的结构：
+					syntax = "proto3";
+
+					message Pair {
+						optional string key = 1;
+						repeated string values = 2;
+					}
+
+					message Request {
+						optional string method = 1;   // GET, POST, etc
+						optional string path = 2;     // e.g /greeter/say/hello
+						map<string, Pair> header = 3; 
+						map<string, Pair> get = 4;    // The URI query params
+						map<string, Pair> post = 5;   // The post body params
+						optional string body = 6;     // raw request body; if not application/x-www-form-urlencoded
+					}
+
+					message Response {
+						optional int32 statusCode = 1;
+						map<string, Pair> header = 2;
+						optional string body = 3;
+					}
+		8.1.3、代理
+			API的请求处理的最终方法是反向代理。 如上所述，API使用请求路径和命名空间组件来确定将请求路由到的服务。 通过提供反向代理和微服务请求路由，我们能够支持REST，这是广泛追捧的要求。
+
+			代理可以通过传递--api_handler = proxy标志来启用。
+	8.2、micro web ui
+		Web UI提供了一个简单的仪表板，用于观察和与正在运行的系统进行交互。 不仅如此，它还提供了非常像API的反向代理。 我们的目标是使用“Web代理”来实现Web应用程序的开发，作为微服务。 再次，就像API一样，请求路径与命名空间一起使用，以确定将请求路由到的服务。 Web代理还支持Web套接字，因为我们看到实时是提供Web应用程序的核心部分。
+	8.3、micro CLI	
+		CLI是一种命令行工具，可在运行环境中提供观察，交互和管理服务的方法。 当前的功能集允许您检查注册表，检查服务的基本运行状况，并对服务本身执行查询。
+		
+9、RPC，REST，Proto ...
+	所以你可能会想的第一件事是为什么RPC，为什么不REST？
+	我们相信，RPC是更为合适的跨业务通信选择。
+	或者更具体地说RPC使用protobuf编码和使用protobuf IDL定义的API。
+	这种组合允许在线上创建强定义的API接口和有效的消息编码格式。 
+	RPC是一个直接的，没有虚拟的通信协议。
+
+	Google是创建者protobuf，在内部使用RPC和最近开源的gRPC，一个RPC框架。 
+	Hailo也是RPC / Protobuf的强力倡导者，在跨系统开发方面比系统性能更受益匪浅。
+	Uber选择自己的路径已经开发了一个称为TChannel的RPC框架协议。
+
+	就个人而言，我们认为未来的API将使用RPC构建，因为它们具有良好的结构化格式，
+	使用高效编码协议的倾向，如使用强大定义的API和执行通信的组合的protobuf。
+
+10、HTTP到RPC，API ...
+	实际上，我们距离RPC在网络上还有很长的路要走。
+	虽然它在数据中心内部的完美内容，面向公众的流量，如网站和移动API，是一个完整的方案。
+	让我们面对它，在我们离开HTTP之前，这将是一段时间。
+	这是微软包括API网关，服务和翻译HTTP请求的原因之一。
+
+	API网关是用于微服务架构的模式。
+	它作为外部世界的单个入口点，并根据请求路由到适当的服务。
+	这允许HTTP API本身由不同的微服务组成。
+
+	这是一个强大的架构模式。在API的一部分单一更改可能会降低整个整体的日子已经过去了。
+	The micro API uses path-to-service resolution so that each unique request path can be served by a different API micro service 。
+	e.g. /user => user api, /order => order api.
+
+	Here’s an example. A request to /customer/orders will be sent to the API service go.micro.api.customer with method Customer.Orders.
+
+11、服务类型
+	微服务的概念是关于分离问题，借鉴了一贯做好事情的unix理念。 部分原因我们认为需要在不同责任的服务之间建立逻辑和建筑分离。
+	现在我将承认，这些概念并不是什么新鲜事物，但是由于已经在非常大的成功的技术公司中被证明了这些概念，因此它们是令人信服的 我们的目标是传播这些发展哲学，并通过工具指导设计决策。
+
+	所以这里是我们目前定义的服务类型。
+	11.1、API
+		由Micro API提供，API服务位于基础架构的边缘，
+		最有可能为公众提供流量，以及移动或网络应用。 
+		您可以使用HTTP处理程序构建它，并以反向代理模式运行micro api，
+		或者通过默认处理一个特定的RPC API请求响应格式，
+		可以在这里找到：https://github.com/micro/micro/blob/master/api/proto/api.proto
+	11.2、WEB
+		由micro web服务，Web服务专注于提供html内容和仪表板。 
+		micro web反向代理HTTP和WebSockets。 这些是目前唯一支持的协议，但将来可能会被扩展
+		如前所述we believe in web apps as microservices.
+	11.3、SRV
+		这些是后端的基于RPC的服务。 
+		它们主要侧重于为您的系统提供核心功能，并且很有可能不会面临公众。 
+		如果您喜欢，还可以通过micro api或web使用/ rpc终端访问它们，
+		但是更可能的是，API，Web和其他SRV服务使用go-micro client直接调用它们。
+	11.4、综述
+		根据过去的经验，我们发现这种类型的架构模式非常强大，可以看到它扩展到数百种服务。 通过将其构建到微架构中，我们认为它为微服务开发提供了良好的基础。
+	11.5、命名空间
+		是什么阻止micro api 和 web services通信，micro web与api services通信。 我们使用逻辑命名空间分隔这些。 通过在服务名称前面添加一个命名空间，我们清楚地确定它在系统中的目的和位置。 这是一个简单但有效的模式，为我们服务。
+		micro api和web将组成命名空间的服务名称和请求路径的第一路径，
+		例如 对api/customer的请求成为go.micro.api.customer。
+		默认命名空间是：
+			API - go.micro.api
+			Web - go.micro.web
+			SRV - go.micro.srv
+		您应该将这些设置为您的域，例如com.example。{api，web，srv}。
+		micro api和micro Web可以在运行时配置为路由到您的命名空间。
+	11.6、同步与异步
+		对许多人来说，微服务是关于创建事件驱动架构和设计主要通过异步通信进行交互的服务。
+		micro将异步通信视为一流的公民，是微服务的基础。
+		通过异步消息传递事件可以让任何人消费和采取行动。 
+		可以构建新的独立服务，而无需对系统的其他方面进行任何修改。 
+		这是一个强大的设计模式，因此，我们将Broker界面包含在微软中。
+		
+		同步和异步通信在Micro中被单独提出。
+		The Transport interface用于创建服务之间的点对点连接。 
+		The go-micro client and server构建在传输上以执行请求响应RPC并提供双向流的能力
+		
+		在建立系统时，应该使用这两种通信模式，但是了解每个适当的时间和地点是关键。 在很多情况下，没有对或错，但是会做出一些权衡。
+12、什么定义了微服务
+	我们涵盖了Micro工具包为微服务提供的许多工具，
+	我们已经定义了服务类型（API，WEB，SRV），但实际上并没有什么真正的微服务器。
+	
+	我们的信念和我们建立的理念是，微服务是一种专注于单一类型的实体或域的应用程序，它通过强大的API来提供访问。
+	
+	版本也是微服务重要的组成部分。go-micro server创建时会定义name和version
+13、安装
+	13.1、安装etcd
+		go get github.com/coreos/etcd
+	或者.
+		git clone https://github.com/coreos/etcd.git 放在/wz/gopath/src/github.com/coreos
+		cd etcd;./build;./bin/etcd
+		As an example. If you would like to use etcd, import the plugin and set the command line flags on your binary.
+
+		_ "github.com/micro/go-plugins/registry/etcdv3"
+		./main --registry=etcdv3 --registry_address=127.0.0.1:2379
+		
+		在micro的main.go页加上etcdv3，然后编译安装。
+			micro --registry=etcdv3 --registry_address=127.0.0.1:2379 api
+	13.2、go-micro
+		go get github.com/micro/go-micro
+		go get github.com/micro/protobuf/{proto,protoc-gen-go}
+	13.3、工具集
+		go get github.com/micro/micro
+		
+14、容错
+	Rationale原理	Solution解决方案	Usage用法
+	
+	14.1、心跳（刷新服务发现注册的机制）
+		服务在启动时注册服务发现，关闭时注销服务发现。但是意外死亡需要自动删除的机制
+		Micro支持寄存器TTL和寄存器间隔的选项。
+		TTL指定服务注册的时间，超过这个时间服务会被服务发现移除
+		interval让服务在指定时间内重新注册，保持TTL获取的注册时间是有效的。
+		用法：
+		micro toolkit：
+			micro --register_ttl=30 --register_interval=15 api
+		go-micro：
+			service := micro.NewService(
+        micro.Name("com.example.srv.foo"),
+        micro.RegisterTTL(time.Second*30),
+        micro.RegisterInterval(time.Second*15),
+			)
+	14.2、负载均衡（负载均衡是一种扩展请求负载或维持高可用性的方式）
+		 selector interface
+			Client side load balancing is built into the go-micro client. This is done automatically
+	14.3、Retries
+		The micro client includes a mechanism for retrying requests.
+		重试可以设置为客户端的标志或选项。 它默认为1，这意味着1次尝试请求。
+		通过标志更改	
+			micro --client_retries=3
+		设置为选项
+			client.Init(
+				client.Retries(3),
+			)
+	14.4、Caching Discovery
+		发现缓存是服务发现信息的客户端缓存
+		客户端缓存是排除服务发现作为瓶颈和单点故障的一种方法
+			
+
+		
+		
+	
+end、常见的缺失：
+	https://github.com/google/go-genproto
+		mv go-genproto genproto
+	https://github.com/golang/text
+
+详细内容请参考官方文档：
+	https://micro.mu/docs/index.html
+
+	
+	
+	
+	
+	

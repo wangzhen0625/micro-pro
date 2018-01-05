@@ -1,1 +1,15 @@
-0、综述
+项目架构：
+web -(RESTful)-> 
+	micro api(将http请求转换成rpc请求) -->api(类似控制层访问srv使用rpc) -->srv（类似模型层，专注操作数据库）
+
+
+服务发现使用etcd3
+
+
+
+
+
+
+
+
+

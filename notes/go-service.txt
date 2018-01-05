@@ -1,0 +1,134 @@
+1、初始化
+import "github.com/micro/go-micro"
+
+service := micro.NewService()
+可以在创建期间传参
+service := micro.NewService(
+        micro.Name("greeter"),
+        micro.Version("latest"),
+)
+
+Go Micro还提供了一种使用micro.Flags设置命令行标志的方法
+
+import (
+	"github.com/micro/cli"
+	"github.com/micro/go-micro"
+)
+
+service := micro.NewService(
+	micro.Flags(
+		cli.StringFlag{
+						Name:  "environment",
+						Usage: "The environment",
+		},
+	)
+)
+
+2、定义API
+我们使用protobuf文件来定义服务API接口。 这是一种非常方便的方式来严格定义API并为服务器和客户端提供具体的类型。
+
+greeter.proto
+
+syntax = "proto3";
+
+service Greeter {
+	rpc Hello(HelloRequest) returns (HelloResponse) {}
+}
+
+message HelloRequest {
+	string name = 1;
+}
+
+message HelloResponse {
+	string greeting = 2;
+}
+这里我们定义一个名为Greeter的服务处理程序，方法Hello使用参数HelloRequest类型并返回HelloResponse
+
+3、生成API接口
+
+我们使用protoc和protoc-gen-go来为这个定义生成具体的执行。
+
+Go-micro使用代码生成来提供客户端存根方法来减少锅炉板代码，就像gRPC一样。 这是通过一个protobuf插件完成的，需要一个golang / protobuf的fork，可以在这里找到github.com/micro/protobuf。
+
+go get github.com/micro/protobuf/{proto,protoc-gen-go}
+
+protoc --go_out=plugins=micro:. greeter.proto
+生成的类型现在可以在进行请求时在服务器或客户端的处理程序中导入和使用。
+
+4、实现处理程序
+服务器要求处理程序被注册以提供请求。 处理程序是一种公共类型，具有符合签名的公共方法
+
+func(ctx context.Context, req interface{}, rsp interface{}) error.
+如上所述，Greeter接口的处理程序签名如下所示。
+type GreeterHandler interface {
+        Hello(context.Context, *HelloRequest, *HelloResponse) error
+}
+
+这是Greeter处理程序的一个实现。
+import proto "github.com/micro/examples/service/proto"
+type Greeter struct{}
+
+func (g *Greeter) Hello(ctx context.Context, req *proto.HelloRequest, rsp *proto.HelloResponse) error {
+	rsp.Greeting = "Hello " + req.Name
+	return nil
+}
+
+处理程序与您的服务注册很像http.Handler。
+service := micro.NewService(
+	micro.Name("greeter"),
+)
+
+proto.RegisterGreeterHandler(service.Server(), new(Greeter))
+
+
+5、运行服务
+该服务可以通过调用server.Run来运行。 这导致服务绑定到配置中的地址（默认为找到的第一个RFC1918接口和随机端口）并监听请求。
+
+这将在启动时注册该注册表，并在发出杀死信号时注册Deregister。
+if err := service.Run(); err != nil {
+	log.Fatal(err)
+}
+
+
+
+6、完整的服务
+greeter.go
+
+package main
+
+import (
+        "log"
+
+        "github.com/micro/go-micro"
+        proto "github.com/micro/examples/service/proto"
+
+        "golang.org/x/net/context"
+)
+
+type Greeter struct{}
+
+func (g *Greeter) Hello(ctx context.Context, req *proto.HelloRequest, rsp *proto.HelloResponse) error {
+        rsp.Greeting = "Hello " + req.Name
+        return nil
+}
+
+func main() {
+        service := micro.NewService(
+                micro.Name("greeter"),
+                micro.Version("latest"),
+        )
+
+        service.Init()
+
+        proto.RegisterGreeterHandler(service.Server(), new(Greeter))
+
+        if err := service.Run(); err != nil {
+                log.Fatal(err)
+        }
+}
+注意。 服务发现机制需要运行，因此服务可以注册以由客户端和其他服务发现。 这里快速开始
+https://github.com/micro/go-micro#getting-started
+
+
+
+
