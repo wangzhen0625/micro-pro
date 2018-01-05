@@ -1,11 +1,92 @@
-RBAC
-用户
-	
+/v1/account/node
+/v1/account/role
+/v1/account/application
+
+NIST RBAC模型
+(http://williamou.iteye.com/)
+Flat RBAC  基础（用这个即可）
+	1、用户通过角色获取权限
+	2、必须支持用户和角色的多对多分配 user role
+	3、必须支持权限permission和角色的多对多分配
+	4、必须支持角色和用户的双向查找
+	5、用户可以同时使用多个角色的权限
+
+
+
+jstree传给页面/admin/account/companyShow?id=3&type=organization
+
+页面请求api /v1/account/nodes/3?type=organization
+
+{id: "3", login_id: "topsec", auth_method: "1", type: "organization", code: "", role_id: [25]}
+
+{
+	id:11
+	login_id:22
+	email:33
+	name:44
+	rank:55
+	id:3b8e77a8-8133-ec89-f589-e373a281e3c4
+	auth_method:1
+	role_id:
+	type:person
+	parent_node:3
+	state:0
+	gender:0	
+}
+/v1/login/
+/v1/system/
+/v1/log/
+
+/v1/account/nodes
+/v1/account/nodes/{pid}/passcodes/{id}
+/v1/account/attributes
+/v1/account/roles
+/v1/account/onlines
+/v1/account/applications{pid}/ssos/{id}
+
+/v1/authZ/
+
+/v1/authN/
+
+账号
+	用户：
+		申请新增用户（部门名称）
+		修改基本信息
+
+	业务管理员：
+		修改密码策略
+
+		通行码强度
+
+		认证方式固定
+
+		节点类型：组织、用户组、用户
+
+		新增节点
+		修改节点信息
+		修改节点认证方式（多对一）
+		修改节点角色（多对多）
+		删除节点
+		查看节点
+
+		认证方式：最小集合关系：先找用户的认证方式，用户没有设置认证方式则找上一级用户组的认证方式，以此类推
+		角色：最小集合关系：先找用户的角色，用户没有设置角色则找上一级用户组的角色，以此类推
+
 角色
+	新增角色
+	删除角色
+	修改角色
+	查看角色
+	角色添加用户
+	角色添加应用
 	
 应用
-
-
+	新增
+	删除
+	修改基本信息
+	修改细粒度规则
+	修改单点登录方式
+	查看
 
 
 
