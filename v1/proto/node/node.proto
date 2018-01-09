@@ -6,9 +6,9 @@ service Node {
 	rpc NodeIndex(NodeReq) returns (NodeRsp) {}
 	rpc NodeChildren(NodeReq) returns (stream NodeRsp) {}
 	
-	rpc NodeRead(NodeReq) returns (NodeRsp) {}
-	rpc NodeSave(NodeReq) returns (NodeRsp) {}
-	rpc NodePatch(NodeReq) returns (NodeRsp) {}
+	rpc NodeRead(NodeReq) returns (NodeInfo) {}
+	rpc NodeSave(NodeInfo) returns (NodeInfo) {}
+	rpc NodePatch(NodeInfo) returns (NodeInfo) {}
 	rpc NodeDelete(NodeReq) returns (NodeRsp) {}
 }
 
@@ -30,5 +30,18 @@ message NodeRsp {
 	string parent = 4;
 	string text = 5;
 	string type = 6;
+}
+
+message NodeInfo {
+	string id = 1;
+	string login_id = 2;
+	string auth_method = 3;
+	string type = 4;
+	repeated string role = 5;
+	string name = 6;
+	string email = 7;
+	string state = 8;
+	string gender = 9;
+	string rank = 10;
 }
 

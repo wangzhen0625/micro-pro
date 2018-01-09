@@ -6,9 +6,9 @@ import (
 	"github.com/micro/go-web"
 	"log"
 	"micro-pro/v1/pkg/account"
-	appPt "micro-pro/v1/proto/application"
+	// appPt "micro-pro/v1/proto/application"
 	nodePt "micro-pro/v1/proto/node"
-	rolePt "micro-pro/v1/proto/role"
+	// rolePt "micro-pro/v1/proto/role"
 	"time"
 )
 
@@ -21,7 +21,7 @@ func (r Account) NewContainer() *restful.WebService {
 	ws.Produces(restful.MIME_JSON, restful.MIME_XML)
 	ws.Path("/v1/account")
 
-	account.NodeCli = accPt.NewNodeClient("go.micro.srv.v1.node", client.DefaultClient)
+	account.NodeCli = nodePt.NewNodeClient("go.micro.srv.v1.node", client.DefaultClient)
 	node := account.CreateNode()
 	ws.Route(ws.GET("/nodes").To(node.NodeIndex))          //index
 	ws.Route(ws.GET("/nodes/{id}").To(node.NodeRead))      //read
@@ -29,21 +29,21 @@ func (r Account) NewContainer() *restful.WebService {
 	ws.Route(ws.PATCH("/nodes/{id}").To(node.NodePatch))   //patch
 	ws.Route(ws.DELETE("/nodes/{id}").To(node.NodeDelete)) //delete
 
-	account.RoleCli = accPt.NewRoleClient("go.micro.srv.v1.role", client.DefaultClient)
-	role := account.CreateRole()
-	ws.Route(ws.GET("/roles").To(role.RoleIndex))          //index
-	ws.Route(ws.GET("/roles/{id}").To(role.RoleRead))      //read
-	ws.Route(ws.POST("/roles").To(role.RoleSave))          //save
-	ws.Route(ws.PATCH("/roles/{id}").To(role.RolePatch))   //patch
-	ws.Route(ws.DELETE("/roles/{id}").To(role.RoleDelete)) //delete
+	/*	account.RoleCli = rolePt.NewRoleClient("go.micro.srv.v1.role", client.DefaultClient)
+		role := account.CreateRole()
+		ws.Route(ws.GET("/roles").To(role.RoleIndex))          //index
+		ws.Route(ws.GET("/roles/{id}").To(role.RoleRead))      //read
+		ws.Route(ws.POST("/roles").To(role.RoleSave))          //save
+		ws.Route(ws.PATCH("/roles/{id}").To(role.RolePatch))   //patch
+		ws.Route(ws.DELETE("/roles/{id}").To(role.RoleDelete)) //delete
 
-	app.AppCli = accPt.NewApplicationClient("go.micro.srv.v1.application", client.DefaultClient)
-	app := account.CreateApp()
-	ws.Route(ws.GET("/applications").To(app.AppIndex))          //index
-	ws.Route(ws.GET("/applications/{id}").To(app.AppRead))      //read
-	ws.Route(ws.POST("/applications").To(app.AppSave))          //save
-	ws.Route(ws.PATCH("/applications/{id}").To(app.AppPatch))   //patch
-	ws.Route(ws.DELETE("/applications/{id}").To(app.AppDelete)) //delete
+		account.AppCli = appPt.NewAppClient("go.micro.srv.v1.app", client.DefaultClient)
+		app := account.CreateApp()
+		ws.Route(ws.GET("/applications").To(app.AppIndex))          //index
+		ws.Route(ws.GET("/applications/{id}").To(app.AppRead))      //read
+		ws.Route(ws.POST("/applications").To(app.AppSave))          //save
+		ws.Route(ws.PATCH("/applications/{id}").To(app.AppPatch))   //patch
+		ws.Route(ws.DELETE("/applications/{id}").To(app.AppDelete)) //delete*/
 
 	return ws
 }

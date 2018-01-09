@@ -3,7 +3,6 @@ package account
 import (
 	"github.com/emicklei/go-restful"
 	"golang.org/x/net/context"
-	"io"
 	"log"
 	appPt "micro-pro/v1/proto/application"
 	"reflect"
@@ -12,19 +11,6 @@ import (
 var (
 	AppCli appPt.AppClient
 )
-
-type LiAttr struct {
-	Guid string `json:"guid" default:"0"`
-	Type string `json:"type" description:"id" default:"0"`
-}
-type User struct {
-	Children bool   `json:"children" description:"children"  default:"0"`
-	Id       string `json:"id" description:"id" default:"0"`
-	Liattr   LiAttr `json:"li_attr" default:"0"`
-	Parent   string `json:"parent" default:"0"`
-	Text     string `json:"text" default:"0"`
-	Type     string `json:"type" default:"0"`
-}
 
 /*
 index
@@ -37,91 +23,48 @@ index
 
   ]
 */
-func (n *node) NodeIndex(req *restful.Request, rsp *restful.Response) {
+func (n *node) AppIndex(req *restful.Request, rsp *restful.Response) {
 
-	nodePId := req.QueryParameter("parentId")
 	nodeguid := req.QueryParameter("guid")
-	nodeType := req.QueryParameter("type")
-	if nodePId == "" {
-		log.Print("node index")
-		nodePId = "#"
-		log.Print(reflect.TypeOf(accPt.NodeReq{}).String())
-		response, err := Acl.NodeIndex(context.TODO(), &accPt.NodeReq{
-			ParentId: nodePId,
-			Guid:     nodeguid,
-			Type:     nodeType,
-		})
-		if err != nil {
-			rsp.WriteError(500, err)
-		}
-
-		rsp.WriteEntity(response)
-
-	} else {
-		log.Print("node children")
-		var savedFeatures []*accPt.NodeRsp
-		var nilFeatures [0]accPt.NodeRsp
-		stream, err := Acl.NodeChildren(context.TODO(), &accPt.NodeReq{
-			ParentId: nodePId,
-			Guid:     nodeguid,
-			Type:     nodeType,
-		})
-		if err != nil {
-			rsp.WriteError(500, err)
-		}
-
-		for {
-			feature, err := stream.Recv()
-			if err == io.EOF {
-				log.Println(111)
-				break
-			}
-			if err != nil {
-				log.Fatalf("%v.ListFeatures(_) = _, %v", Acl, err)
-			}
-			log.Println(feature)
-			savedFeatures = append(savedFeatures, feature)
-		}
-		log.Print(len(savedFeatures))
-		if len(savedFeatures) == 0 {
-			rsp.WriteEntity(nilFeatures)
-		} else {
-			rsp.WriteEntity(savedFeatures)
-		}
+	log.Print("node index")
+	log.Print(reflect.TypeOf(appPt.AppReq{}).String())
+	response, err := AppCli.AppIndex(context.TODO(), &appPt.AppReq{
+		Id:   1,
+		Name: nodeguid,
+	})
+	if err != nil {
+		rsp.WriteError(500, err)
 	}
+
+	rsp.WriteEntity(response)
 
 }
 
 // /v1/user/accounts/3?type=organization
-func (n *node) NodeRead(req *restful.Request, rsp *restful.Response) {
-	nodeType := req.QueryParameter("type")
+func (n *node) AppRead(req *restful.Request, rsp *restful.Response) {
 	nodeguid := req.PathParameter("id")
-	if nodePId !== "" {
+	if nodeguid != "" {
 		log.Print("node index")
-		nodePId = "#"
-		log.Print(reflect.TypeOf(accPt.NodeReq{}).String())
-		response, err := Acl.NodeRead(context.TODO(), &accPt.NodeReq{
-			Guid: nodeguid,
-			Type: nodeType,
+		log.Print(reflect.TypeOf(appPt.AppReq{}).String())
+		response, err := AppCli.AppRead(context.TODO(), &appPt.AppReq{
+			Id: 1,
 		})
 		if err != nil {
 			rsp.WriteError(500, err)
 		}
 
 		rsp.WriteEntity(response)
-	}else{
-		rsp.WriteError(500, "err")
 	}
 }
-func (n *node) NodeSave(req *restful.Request, rsp *restful.Response) {
+func (n *node) AppSave(req *restful.Request, rsp *restful.Response) {
 	log.Print("Received Rest.Test API request")
 	rsp.WriteEntity(User{})
 }
-func (n *node) NodePatch(req *restful.Request, rsp *restful.Response) {
+func (n *node) AppPatch(req *restful.Request, rsp *restful.Response) {
 	log.Print("Received Rest.Test API request")
 	rsp.WriteEntity(User{})
 }
-func (n *node) NodeDelete(req *restful.Request, rsp *restful.Response) {
+func (n *node) AppDelete(req *restful.Request, rsp *restful.Response) {
 	log.Print("Received Rest.Test API request")
 	rsp.WriteEntity(User{})
 }

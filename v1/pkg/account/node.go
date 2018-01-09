@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	nodePt "micro-pro/v1/proto/node"
+	"net/http"
 	"reflect"
 )
 
@@ -92,36 +93,75 @@ func (n *node) NodeIndex(req *restful.Request, rsp *restful.Response) {
 
 }
 
-// /v1/user/accounts/3?type=organization
+// /v1/user/accounts/3?type=organization  类型用来查找属性
 func (n *node) NodeRead(req *restful.Request, rsp *restful.Response) {
-	nodeType := req.QueryParameter("type")
+	log.Print("NodeRead")
 	nodeguid := req.PathParameter("id")
-	if nodePId != "" {
-		log.Print("node index")
-		nodePId = "#"
-		log.Print(reflect.TypeOf(nodePt.NodeReq{}).String())
-		response, err := NodeCli.NodeRead(context.TODO(), &nodePt.NodeReq{
-			Guid: nodeguid,
-			Type: nodeType,
-		})
-		if err != nil {
-			rsp.WriteError(500, err)
-		}
+	nodeType := req.QueryParameter("type")
+	log.Print(nodeguid)
+	log.Print(nodeType)
+	response, err := NodeCli.NodeRead(context.TODO(), &nodePt.NodeReq{
+		Guid: nodeguid,
+		Type: nodeType,
+	})
+	if err != nil {
+		rsp.WriteError(500, err)
+	}
 
-		rsp.WriteEntity(response)
+	rsp.WriteEntity(response)
+}
+
+///v1/user/accounts post
+func (n *node) NodeSave(req *restful.Request, rsp *restful.Response) {
+	log.Print("NodeSave")
+
+	node := nodePt.NodeInfo{}
+	err := req.ReadEntity(&node)
+	if err == nil {
+		rsp.WriteHeaderAndEntity(http.StatusCreated, node)
 	} else {
-		rsp.WriteError(500, "err")
+		rsp.WriteError(http.StatusInternalServerError, err)
+	}
+
+	response, err := NodeCli.NodeSave(context.TODO(), &node)
+	if err == nil {
+		rsp.WriteHeaderAndEntity(http.StatusOK, response)
+	} else {
+		rsp.WriteError(http.StatusInternalServerError, err)
 	}
 }
-func (n *node) NodeSave(req *restful.Request, rsp *restful.Response) {
-	log.Print("Received Rest.Test API request")
-	rsp.WriteEntity(User{})
-}
+
+// /v1/user/accounts/id patch
 func (n *node) NodePatch(req *restful.Request, rsp *restful.Response) {
-	log.Print("Received Rest.Test API request")
-	rsp.WriteEntity(User{})
+	log.Print("NodePatch")
+	nodeguid := req.PathParameter("id")
+	node := nodePt.NodeInfo{}
+	node.Id = nodeguid
+	err := req.ReadEntity(&node)
+	if err == nil {
+		rsp.WriteHeaderAndEntity(http.StatusCreated, node)
+	} else {
+		rsp.WriteError(http.StatusInternalServerError, err)
+	}
+
+	response, err := NodeCli.NodePatch(context.TODO(), &node)
+	if err == nil {
+		rsp.WriteHeaderAndEntity(http.StatusOK, response)
+	} else {
+		rsp.WriteError(http.StatusInternalServerError, err)
+	}
 }
+
+// /v1/user/accounts/id delete 删除返回空数据
 func (n *node) NodeDelete(req *restful.Request, rsp *restful.Response) {
-	log.Print("Received Rest.Test API request")
-	rsp.WriteEntity(User{})
+	log.Print("NodeDelete api")
+	nodeguid := req.PathParameter("id")
+	_, err := NodeCli.NodeDelete(context.TODO(), &nodePt.NodeReq{
+		Guid: nodeguid,
+	})
+	if err == nil {
+		rsp.WriteHeaderAndEntity(http.StatusNoContent, "")
+	} else {
+		rsp.WriteError(http.StatusInternalServerError, err)
+	}
 }

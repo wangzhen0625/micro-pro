@@ -159,5 +159,31 @@ profile := Profile{
 db.Create(&profile)
 
 
+
+
+
+新增：
+user := User{Name: "Jinzhu", Age: 18, Birthday: time.Now()}
+db.NewRecord(user) // => 主键为空返回`true`
+db.Create(&user)
+db.NewRecord(user) // => 创建`user`后返回`false`
+
+
+更新：
+Save将包括执行更新SQL时的所有字段，即使它没有更改
+
+// 使用`struct`更新多个属性，只会更新这些更改的和非空白字段
+db.Model(&user).Updates(User{Name: "hello", Age: 18})
+
+// 使用`RowsAffected`获取更新记录计数
+db.Model(User{}).Updates(User{Name: "hello", Age: 18}).RowsAffected
+
+db.Where("age = ?", 20).Delete(&User{}).RowsAffected
+
+删除
+
+
+
+
 redis
 

@@ -96,95 +96,55 @@ func (a *Node) NodeChildren(ctx context.Context, req *nodePt.NodeReq, stream nod
 	return nil
 }
 
-func (a *Node) NodeRead(ctx context.Context, req *nodePt.NodeReq, rsp *nodePt.NodeRsp) error {
-	log.Print("Received srv account.NodeIndex request")
-	var node NodeInfo
-	mydb.Where(&NodeInfo{ParentNode: req.ParentId}).Select("id,parent_node,type,login_id").First(&node)
-	log.Print(node)
-
-	//  {children: true, id: "3", li_attr:{guid:"3",type: "organization"}, parent: "#", text: "topsec",type: "organization"}
-	liattr := nodePt.LiAttr{}
-	liattr.Guid = node.Id
-	liattr.Type = node.Type
-	if node.Type == "person" {
-		rsp.Children = false
+func (a *Node) NodeRead(ctx context.Context, req *nodePt.NodeReq, rsp *nodePt.NodeInfo) error {
+	log.Println(req.Type)
+	if req.Type == "person" {
+		mydb.Where(&nodePt.NodeInfo{Id: req.Guid}).Select("id,login_id,auth_method,type,name,email,state,gender,rank").First(rsp)
 	} else {
-		rsp.Children = true
+		mydb.Where(&nodePt.NodeInfo{Id: req.Guid}).Select("id,login_id,auth_method,type").First(rsp)
 	}
-	rsp.Id = node.Id
-	rsp.LiAttr = &liattr
-	rsp.Parent = node.ParentNode
-	rsp.Text = node.LoginId
-	rsp.Type = node.Type
 	return nil
 }
 
-func (a *Node) NodeSave(ctx context.Context, req *nodePt.NodeReq, rsp *nodePt.NodeRsp) error {
-	log.Print("Received srv account.NodeIndex request")
+func (a *Node) NodeSave(ctx context.Context, req *nodePt.NodeInfo, rsp *nodePt.NodeInfo) error {
+	log.Print("NodeSave")
 	var node NodeInfo
-	mydb.Where(&NodeInfo{ParentNode: req.ParentId}).Select("id,parent_node,type,login_id").First(&node)
+	mydb.Where(&NodeInfo{Id: req.Id}).Select("id,parent_node,type,login_id").First(&node)
 	log.Print(node)
-
-	//  {children: true, id: "3", li_attr:{guid:"3",type: "organization"}, parent: "#", text: "topsec",type: "organization"}
-	liattr := nodePt.LiAttr{}
-	liattr.Guid = node.Id
-	liattr.Type = node.Type
-	if node.Type == "person" {
-		rsp.Children = false
-	} else {
-		rsp.Children = true
-	}
-	rsp.Id = node.Id
-	rsp.LiAttr = &liattr
-	rsp.Parent = node.ParentNode
-	rsp.Text = node.LoginId
-	rsp.Type = node.Type
 	return nil
 }
 
-func (a *Node) NodePatch(ctx context.Context, req *nodePt.NodeReq, rsp *nodePt.NodeRsp) error {
-	log.Print("Received srv account.NodeIndex request")
+func (a *Node) NodePatch(ctx context.Context, req *nodePt.NodeInfo, rsp *nodePt.NodeInfo) error {
+	log.Print("NodePatch")
 	var node NodeInfo
-	mydb.Where(&NodeInfo{ParentNode: req.ParentId}).Select("id,parent_node,type,login_id").First(&node)
+	mydb.Where(&NodeInfo{Id: req.Id}).Select("id,parent_node,type,login_id").First(&node)
 	log.Print(node)
 
-	//  {children: true, id: "3", li_attr:{guid:"3",type: "organization"}, parent: "#", text: "topsec",type: "organization"}
-	liattr := nodePt.LiAttr{}
-	liattr.Guid = node.Id
-	liattr.Type = node.Type
-	if node.Type == "person" {
-		rsp.Children = false
-	} else {
-		rsp.Children = true
-	}
-	rsp.Id = node.Id
-	rsp.LiAttr = &liattr
-	rsp.Parent = node.ParentNode
-	rsp.Text = node.LoginId
-	rsp.Type = node.Type
 	return nil
 }
 
 func (a *Node) NodeDelete(ctx context.Context, req *nodePt.NodeReq, rsp *nodePt.NodeRsp) error {
-	log.Print("Received srv account.NodeIndex request")
-	var node NodeInfo
-	mydb.Where(&NodeInfo{ParentNode: req.ParentId}).Select("id,parent_node,type,login_id").First(&node)
-	log.Print(node)
+	log.Print("NodeDelete")
 
-	//  {children: true, id: "3", li_attr:{guid:"3",type: "organization"}, parent: "#", text: "topsec",type: "organization"}
-	liattr := nodePt.LiAttr{}
-	liattr.Guid = node.Id
-	liattr.Type = node.Type
-	if node.Type == "person" {
-		rsp.Children = false
+	num := mydb.Where("id = ?", req.Guid).Delete(&nodePt.NodeInfo{}).RowsAffected
+	log.Print(num)
+	// 检查是否返回RecordNotFound错误
+	/*node := nodePt.NodeInfo{}
+	if mydb.Where("id = ?", req.Guid).First(&node).RecordNotFound() {
+		//数据不存在
+		log.Print("errorrrrr")
 	} else {
-		rsp.Children = true
-	}
-	rsp.Id = node.Id
-	rsp.LiAttr = &liattr
-	rsp.Parent = node.ParentNode
-	rsp.Text = node.LoginId
-	rsp.Type = node.Type
+		tx := mydb.Begin()
+		// 注意，一旦你在一个事务中，使用tx作为数据库句柄
+
+		if err := tx.Delete(&node).Error; err != nil {
+			log.Print("errorrrrr")
+			tx.Rollback()
+			return err
+		}
+
+		tx.Commit()
+	}*/
 	return nil
 }
 
