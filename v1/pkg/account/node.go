@@ -3,12 +3,14 @@ package account
 import (
 	"github.com/emicklei/go-restful"
 	"golang.org/x/net/context"
+	"io"
 	"log"
-	accPt "micro-pro/v1/proto/account"
+	nodePt "micro-pro/v1/proto/node"
+	"reflect"
 )
 
 var (
-	acl accPt.AccountClient
+	NodeCli nodePt.NodeClient
 )
 
 type LiAttr struct {
@@ -30,36 +32,86 @@ index
   {children: true, id: "3", li_attr:{guid:"3",type: "organization"}, parent: "#", text: "topsec",type: "organization"}
 其他结点 /v1/account/nodes?parentId=3&guid=3&type=organization
   [
-  {children: true, id: "3", li_attr:{guid:"3",type: "organization"}, parent: "#", text: "topsec",type: "organization"},
-  {children: true, id: "3", li_attr:{guid:"3",type: "organization"}, parent: "#", text: "topsec",type: "organization"}
+  {children: true, id: "4", li_attr:{guid:"3",type: "organization"}, parent: "3", text: "topsec",type: "organization"},
+  {children: true, id: "5", li_attr:{guid:"3",type: "organization"}, parent: "3", text: "topsec",type: "organization"}
 
   ]
 */
 func (n *node) NodeIndex(req *restful.Request, rsp *restful.Response) {
-	log.Print("node index")
 
 	nodePId := req.QueryParameter("parentId")
 	nodeguid := req.QueryParameter("guid")
 	nodeType := req.QueryParameter("type")
 	if nodePId == "" {
+		log.Print("node index")
 		nodePId = "#"
-	}
-	response, err := acl.NodeIndex(context.TODO(), &accPt.NodeReq{
-		ParentId: nodePId,
-		Guid:     nodeguid,
-		Type:     nodeType,
-	})
+		log.Print(reflect.TypeOf(nodePt.NodeReq{}).String())
+		response, err := NodeCli.NodeIndex(context.TODO(), &nodePt.NodeReq{
+			ParentId: nodePId,
+			Guid:     nodeguid,
+			Type:     nodeType,
+		})
+		if err != nil {
+			rsp.WriteError(500, err)
+		}
 
-	if err != nil {
-		rsp.WriteError(500, err)
+		rsp.WriteEntity(response)
+
+	} else {
+		log.Print("node children")
+		var savedFeatures []*nodePt.NodeRsp
+		var nilFeatures [0]nodePt.NodeRsp
+		stream, err := NodeCli.NodeChildren(context.TODO(), &nodePt.NodeReq{
+			ParentId: nodePId,
+			Guid:     nodeguid,
+			Type:     nodeType,
+		})
+		if err != nil {
+			rsp.WriteError(500, err)
+		}
+
+		for {
+			feature, err := stream.Recv()
+			if err == io.EOF {
+				log.Println(111)
+				break
+			}
+			if err != nil {
+				log.Fatalf("%v.ListFeatures(_) = _, %v", NodeCli, err)
+			}
+			log.Println(feature)
+			savedFeatures = append(savedFeatures, feature)
+		}
+		log.Print(len(savedFeatures))
+		if len(savedFeatures) == 0 {
+			rsp.WriteEntity(nilFeatures)
+		} else {
+			rsp.WriteEntity(savedFeatures)
+		}
 	}
 
-	rsp.WriteEntity(response)
 }
+
+// /v1/user/accounts/3?type=organization
 func (n *node) NodeRead(req *restful.Request, rsp *restful.Response) {
-	liattr := LiAttr{Guid: "3", Type: "organization"}
-	log.Print("Received Rest.Test API request")
-	rsp.WriteEntity(User{Children: true, Id: "3", Liattr: liattr, Parent: "#", Text: "topsec", Type: "organization"})
+	nodeType := req.QueryParameter("type")
+	nodeguid := req.PathParameter("id")
+	if nodePId != "" {
+		log.Print("node index")
+		nodePId = "#"
+		log.Print(reflect.TypeOf(nodePt.NodeReq{}).String())
+		response, err := NodeCli.NodeRead(context.TODO(), &nodePt.NodeReq{
+			Guid: nodeguid,
+			Type: nodeType,
+		})
+		if err != nil {
+			rsp.WriteError(500, err)
+		}
+
+		rsp.WriteEntity(response)
+	} else {
+		rsp.WriteError(500, "err")
+	}
 }
 func (n *node) NodeSave(req *restful.Request, rsp *restful.Response) {
 	log.Print("Received Rest.Test API request")

@@ -1,18 +1,38 @@
 package main
 
 import (
+	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"github.com/liudng/godump"
-	"time"
+	// "github.com/liudng/godump"
+	// "time"
 )
 
+/*
+type Model struct {
+  ID        uint `gorm:"primary_key"`
+  CreatedAt time.Time
+  UpdatedAt time.Time
+  DeletedAt *time.Time
+}
+*/
+// type User struct {
+// 	Id        uint
+// 	Name      string
+// 	CreatedAt time.Time  `gorm:"column:create_time"`
+// 	UpdatedAt time.Time  `gorm:"column:update_time"`
+// 	DeletedAt *time.Time `gorm:"column:delete_time"`
+// }.
+
 type User struct {
-	Id        uint
-	Name      string
-	CreatedAt time.Time  `gorm:"column:create_time"`
-	UpdatedAt time.Time  `gorm:"column:update_time"`
-	DeletedAt *time.Time `gorm:"column:delete_time"`
+	ID       uint `gorm:"primary_key"`
+	Name     string
+	Profiles []Profile `gorm:"many2many:user_profiles;"`
+}
+type Profile struct {
+	ID    uint `gorm:"primary_key"`
+	Name  string
+	Users []User `gorm:"many2many:user_profiles;"`
 }
 
 func main() {
@@ -23,42 +43,46 @@ func main() {
 	defer db.Close()
 	db.SingularTable(true) //全局限制不是复数
 
-	//创建
-	/*	user := User{Name: "1"}
+	/*	//创建
+		user := User{Name: "1"}
 		db.Create(&user)
 		//判断是否创建成功，成功返回false
 		if db.NewRecord(user) {
 			//创建失败
 			return
 		}
-		godump.Dump(1)*/
-	//软删除
-	// num := db.Where("id = ?", 1).Delete(&User{}).RowsAffected
-	// godump.Dump(num)
-	//查询所有被删除的数据
-	// var users []User
-	// db.Unscoped().Where("delete_time > 0").Find(&users)
-	//永久删除被删除的数据
-	// db.First(&user, 1) // 查询id为1的product
-	// user := User{Id: 1}
-	// db.Unscoped().Delete(&user)
+		godump.Dump(1)
+		//软删除
+		// num := db.Where("id = ?", 1).Delete(&User{}).RowsAffected
+		// godump.Dump(num)
+		//查询所有被删除的数据
+		// var users []User
+		// db.Unscoped().Where("delete_time > 0").Find(&users)
+		//永久删除被删除的数据
+		// db.First(&user, 1) // 查询id为1的product
+		// user := User{Id: 1}
+		// db.Unscoped().Delete(&user)
 
-	/*	//修改
-		var user User
-		db.First(&user, 2)
-		// 使用`struct`更新多个属性，只会更新这些更改的和非空白字段,如果没有指定会更新所有的记录
-		num := db.Model(&user).Updates(User{Name: "ww"}).RowsAffected
-		// db.Model(&user).Updates(map[string]interface{}{"name": "222"}).RowsAffected
-		godump.Dump(num)*/
-	// db.First(&product, "code = ?", "L1212") // 查询code为l1212的product
+			//修改
+			var user User
+			db.First(&user, 2)
+			// 使用`struct`更新多个属性，只会更新这些更改的和非空白字段,如果没有指定会更新所有的记录
+			num := db.Model(&user).Updates(User{Name: "ww"}).RowsAffected
+			// db.Model(&user).Updates(map[string]interface{}{"name": "222"}).RowsAffected
+			godump.Dump(num)
+		// db.First(&product, "code = ?", "L1212") // 查询code为l1212的product
+		// var profile Profile
+	*/
+	user := User{ID: 1, Profiles: []Profile{{ID: 1}}}
+	db.Delete(&user)
 
+	fmt.Println(111)
 	//查找
-	var users []User
-	db.Find(&users)
-	godump.Dump(len(users))
-	for k, v := range users {
-		godump.Dump(k)
-		godump.Dump(v)
-	}
+	// var users []User
+	// db.Find(&users)
+	// fmt.Println(len(users))
+	// for _, v := range users {
+	// 	fmt.Println(v)
+	// }
 
 }

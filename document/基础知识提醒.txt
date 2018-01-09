@@ -4,3 +4,10 @@
 如果一个名字是大写字母开头的（译注：必须是在函数外部定义的包级名字；包级函数名本身也是包级名字） ，那么它将是导出的，也就是说可以被外部的包访问，
 例如fmt包的Printf函数就是导出的，可以在fmt包外部访问。包本身的名字一般总是用小写字母。
 
+
+k8s使用openid-connect-tokens
+https://kubernetes.io/docs/admin/authentication/#openid-connect-tokens
+
+
+k8s使用go-rest
+github.com/emicklei/go-restful

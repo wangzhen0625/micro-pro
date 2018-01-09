@@ -1,0 +1,12 @@
+1. api无法访问srv
+http: panic serving 192.168.74.50:54918: runtime error: invalid memory address or nil pointer dereference
+
+api没有赋值srv的client，就直接调用了
+account.Acl = accPt.NewAccountClient("go.micro.srv.v1.account", client.DefaultClient)
+
+
+2. jstree无法使用左右键，而且样式是默认的
+
+type:person 改成了3
+
+3. proto的li_attr在生成的go实现和srv中的变量是LiAttr

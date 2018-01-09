@@ -1,4 +1,163 @@
 mysql
+当使用struct查询时，GORM将只查询那些具有值的字段
+db.Where(&User{Name: "jinzhu", Age: 20}).First(&user)
+// SELECT * FROM users WHERE name = "jinzhu" AND age = 20 LIMIT 1;
+
+指定要从数据库检索的字段，默认情况下，将选择所有字段;
+db.Select("name, age").Find(&users)
+//// SELECT name, age FROM users;
+
+1.user属于profile
+字段
+user:id,name,profile_id
+pro:id,name
+结构：
+type User struct {
+	ID        uint `gorm:"primary_key"`
+	Name      string
+	Profile   Profile
+	ProfileID	int
+}
+
+type Profile struct {
+	ID     uint `gorm:"primary_key"`
+	Name   string
+}
+代码：
+user属于profile，可以通过user找profile，也可以通过profile找user
+var user User
+var profile Profile
+db.First(&user)
+db.Model(&user).Related(&profile)
+//// SELECT * FROM profiles WHERE id = user.id; // 111是user的外键 ProfileID
+fmt.Println(user)    //{1 wz {0 } 1}
+fmt.Println(profile) //{1 aa}
+
+db.First(&profile)
+db.Model(&profile).Related(&user)
+//// SELECT * FROM profiles WHERE id = user.id; // 111是user的外键 ProfileID
+fmt.Println(profile) //{1 aa}
+fmt.Println(user)    //{1 wz {0 } 1}
+
+2.user包含pro
+
+字段
+user:id,name
+pro:id,name，user_id
+结构：
+type User struct {
+	ID        uint `gorm:"primary_key"`
+	Name      string
+	Profile   Profile
+}
+
+type Profile struct {
+	ID     uint `gorm:"primary_key"`
+	Name   string
+	UserID	int
+}
+代码：
+user包含profile，可以通过user找profile，也可以通过profile找user
+var user User
+var profile Profile
+db.First(&user)
+db.Model(&user).Related(&profile)
+//// SELECT * FROM profiles WHERE id = user.id; // 111是user的外键 ProfileID
+fmt.Println(user)    //{1 wz {0  0}}
+fmt.Println(profile) //{1 aa 1}
+
+
+db.First(&profile)
+db.Model(&profile).Related(&user)
+//// SELECT * FROM profiles WHERE id = user.id; // 111是user的外键 ProfileID
+fmt.Println(user)    //{1 wz {0  0}}
+fmt.Println(profile) //{1 aa 1}
+
+
+
+2.user包含多个pro
+
+字段
+user:id,name
+pro:id,name，user_id
+结构：
+type User struct {
+	ID        uint `gorm:"primary_key"`
+	Name      string
+	Profile   []Profile
+}
+
+type Profile struct {
+	ID     uint `gorm:"primary_key"`
+	Name   string
+	UserID	int
+}
+代码：
+user包含多个profile，可以通过user找profile，也可以通过profile找user
+var user User
+var profile []Profile
+db.First(&user)
+db.Model(&user).Related(&profile)
+//// SELECT * FROM profiles WHERE id = user.id; // 111是user的外键 ProfileID
+fmt.Println(user)    //{1 wz []}
+fmt.Println(profile) //	[{1 aa 1}]
+
+
+var user User
+var profile Profile
+db.First(&profile)
+db.Model(&profile).Related(&user)
+//// SELECT * FROM profiles WHERE id = user.id; // 111是user的外键 ProfileID
+fmt.Println(user)    //{1 wz []}
+fmt.Println(profile) //[{1 aa 1}]
+
+
+4.多对多
+User 包含并属于多个profiles
+type User struct {
+	ID       uint `gorm:"primary_key"`
+	Name     string
+	Profiles []Profile `gorm:"many2many:user_profiles;"`
+}
+type Profile struct {
+	ID    uint `gorm:"primary_key"`
+	Name  string
+	Users []User `gorm:"many2many:user_profiles;"`
+}
+
+var user []User
+var profiles []Profile
+db.First(&user)
+db.Model(&user).Related(&profiles, "Profiles")
+fmt.Println(user)     //[{1 wz []}]
+fmt.Println(profiles) //[{2 bbb []} {2 bbb []}]
+
+db.First(&profiles)
+db.Model(&uprofilesser).Related(&user, "Users")
+fmt.Println(user)     //[{1 wz []}]
+fmt.Println(profiles) //[{2 bbb []} {2 bbb []}]
+
+5.关联新增
+/*user := User{
+	Name: "jinzhu",
+	Profiles: []Profile{
+		{Name: "123"},
+		{Name: "456"},
+	},
+}
+
+db.Create(&user)*/
+
+profile := Profile{
+	Name: "www",
+	Users: []User{
+		{Name: "123"},
+		{Name: "456"},
+	},
+}
+
+db.Create(&profile)
+
 
 redis
 

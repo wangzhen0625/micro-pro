@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package go.micro.srv.v1.role;
+
+service Role {
+	rpc RoleIndex(RoleReq) returns (stream RoleRsp) {}
+	rpc RoleRead(RoleReq) returns (RoleRsp) {}
+	rpc RoleSave(RoleReq) returns (RoleRsp) {}
+	rpc RolePatch(RoleReq) returns (RoleRsp) {}
+	rpc RoleDelete(RoleReq) returns (RoleRsp) {}
+}
+
+message RoleReq {
+	uint64 Id = 1;
+	string Name = 2;
+	string Desc = 3;
+	uint64 Status = 4;
+}
+
+message RoleRsp {
+	uint64 Id = 1;
+	string Name = 2;
+	string Desc = 3;
+	uint64 Status = 4;
+}
+

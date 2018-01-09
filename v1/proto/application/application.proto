@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package go.micro.srv.v1.app;
+
+service App {
+	rpc AppIndex(AppReq) returns (stream AppRsp) {}
+	rpc AppRead(AppReq) returns (AppRsp) {}
+	rpc AppSave(AppReq) returns (AppRsp) {}
+	rpc AppPatch(AppReq) returns (AppRsp) {}
+	rpc AppDelete(AppReq) returns (AppRsp) {}
+}
+
+message AppReq {
+	uint64 Id = 1;
+	string Name = 2;
+	string Desc = 3;
+	uint64 Status = 4;
+}
+
+message AppRsp {
+	uint64 Id = 1;
+	string Name = 2;
+	string Desc = 3;
+	uint64 Status = 4;
+}
+

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>角色增删改查</title>
+
+<style> 
+.div-a{ float:left;width:49%;border:1px solid #F00} 
+.div-b{ float:left;width:49%;border:1px solid #000} 
+</style> 
+</head>
+<body>
+	<div class="div-a">
+		<table id="table">
+			<thead>
+					<tr>
+					<th>id</th>
+					<th>name</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>id</td>
+					<td>name</td>
+				</tr>	
+			</tbody>
+		</table>
+	</div> 
+	<div class="div-b">
+		<form >
+			id:<input type="text" id="id"><br>
+			name:<input type="text" id="name"><br>
+			desc:<input type="text" id="desc"><br>
+			status:<input type="text" id="status"><br>
+		</form>
+	</div> 
+
+
+
+	<script type="text/javascript" src="../js/jquery-3.2.1.min.js"></script>
+	<script type="text/javascript" src="../js/common.js"></script>
+
+	<script type="text/javascript">
+/* 
+wzAjax(url,successFunc);
+wzAjax(data,url,successFunc);
+wzAjax("post",data,url,successFunc);
+wzAjax(dataType,type,data,url,successFunc);
+
+
+列表：http://192.168.74.50:8080/v1/account/roles 	get
+信息 http://192.168.74.50:8080/v1/account/roles/id  get
+新增 http://192.168.74.50:8080/v1/account/roles		post
+修改 http://192.168.74.50:8080/v1/account/roles/id  patch
+删除 http://192.168.74.50:8080/v1/account/roles/id  delete
+ */
+$(function(){
+
+	$("#table td").click(function(){
+      var tdSeq = $(this).parent().find("td").index($(this)[0]);
+      var trSeq = $(this).parent().parent().find("tr").index($(this).parent()[0]);
+      $(this).text(11)
+      alert("第" + (trSeq + 1) + "行，第" + (tdSeq + 1) + "列");
+    });
+	wzAjax("http://192.168.74.50:8080/v1/account/roles",function(data,st){
+		console.log(data)
+		console.log(st)
+	})
+})
+	</script>
+</body>
+</html>
