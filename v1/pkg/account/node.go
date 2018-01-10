@@ -118,17 +118,41 @@ func (n *node) NodeSave(req *restful.Request, rsp *restful.Response) {
 	node := nodePt.NodeInfo{}
 	err := req.ReadEntity(&node)
 	if err == nil {
-		rsp.WriteHeaderAndEntity(http.StatusCreated, node)
+		response, err := NodeCli.NodeSave(context.TODO(), &node)
+		if err == nil {
+			log.Print("-------------------")
+			log.Print(response)
+			log.Print("-------------------")
+			rsp.WriteHeaderAndEntity(http.StatusOK, response)
+		} else {
+			rsp.WriteError(http.StatusInternalServerError, err)
+		}
 	} else {
 		rsp.WriteError(http.StatusInternalServerError, err)
 	}
 
-	response, err := NodeCli.NodeSave(context.TODO(), &node)
+}
+
+///v1/user/accounts post
+func (n *node) NodeSignUp(req *restful.Request, rsp *restful.Response) {
+	log.Print("NodeSave")
+
+	node := nodePt.NodeRegister{}
+	err := req.ReadEntity(&node)
 	if err == nil {
-		rsp.WriteHeaderAndEntity(http.StatusOK, response)
+		response, err := NodeCli.NodeSignUp(context.TODO(), &node)
+		if err == nil {
+			log.Print("-------------------")
+			log.Print(response)
+			log.Print("-------------------")
+			rsp.WriteHeaderAndEntity(http.StatusOK, response)
+		} else {
+			rsp.WriteError(http.StatusInternalServerError, err)
+		}
 	} else {
 		rsp.WriteError(http.StatusInternalServerError, err)
 	}
+
 }
 
 // /v1/user/accounts/id patch
@@ -139,17 +163,16 @@ func (n *node) NodePatch(req *restful.Request, rsp *restful.Response) {
 	node.Id = nodeguid
 	err := req.ReadEntity(&node)
 	if err == nil {
-		rsp.WriteHeaderAndEntity(http.StatusCreated, node)
+		response, err := NodeCli.NodePatch(context.TODO(), &node)
+		if err == nil {
+			rsp.WriteHeaderAndEntity(http.StatusOK, response)
+		} else {
+			rsp.WriteError(http.StatusInternalServerError, err)
+		}
 	} else {
 		rsp.WriteError(http.StatusInternalServerError, err)
 	}
 
-	response, err := NodeCli.NodePatch(context.TODO(), &node)
-	if err == nil {
-		rsp.WriteHeaderAndEntity(http.StatusOK, response)
-	} else {
-		rsp.WriteError(http.StatusInternalServerError, err)
-	}
 }
 
 // /v1/user/accounts/id delete 删除返回空数据

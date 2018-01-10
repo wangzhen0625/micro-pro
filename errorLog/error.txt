@@ -10,3 +10,7 @@ account.Acl = accPt.NewAccountClient("go.micro.srv.v1.account", client.DefaultCl
 type:person 改成了3
 
 3. proto的li_attr在生成的go实现和srv中的变量是LiAttr
+
+
+4. 415 Unsupported Media Type
+form表单提交json格式

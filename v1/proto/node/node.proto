@@ -8,6 +8,7 @@ service Node {
 	
 	rpc NodeRead(NodeReq) returns (NodeInfo) {}
 	rpc NodeSave(NodeInfo) returns (NodeInfo) {}
+	rpc NodeSignUp(NodeRegister) returns (NodeRegister) {}
 	rpc NodePatch(NodeInfo) returns (NodeInfo) {}
 	rpc NodeDelete(NodeReq) returns (NodeRsp) {}
 }
@@ -37,11 +38,25 @@ message NodeInfo {
 	string login_id = 2;
 	string auth_method = 3;
 	string type = 4;
-	repeated string role = 5;
+	string parent_node = 5;
 	string name = 6;
 	string email = 7;
 	string state = 8;
 	string gender = 9;
 	string rank = 10;
+}
+
+message NodeRegister {
+	string id = 1;
+	string login_id = 2;
+	string auth_method = 3;
+	string type = 4;
+	string parent_node = 5;
+	string name = 6;
+	string email = 7;
+	string state = 8;
+	string gender = 9;
+	string rank = 10;
+	uint32 register = 11;
 }
 

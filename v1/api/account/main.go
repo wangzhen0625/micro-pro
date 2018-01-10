@@ -26,7 +26,8 @@ func (r Account) NewContainer() *restful.WebService {
 	ws.Route(ws.GET("/nodes").To(node.NodeIndex))          //index
 	ws.Route(ws.GET("/nodes/{id}").To(node.NodeRead))      //read
 	ws.Route(ws.POST("/nodes").To(node.NodeSave))          //save
-	ws.Route(ws.PATCH("/nodes/{id}").To(node.NodePatch))   //patch
+	ws.Route(ws.POST("/nodes/signup").To(node.NodeSignUp)) //signup
+	ws.Route(ws.PUT("/nodes/{id}").To(node.NodePatch))     //patch
 	ws.Route(ws.DELETE("/nodes/{id}").To(node.NodeDelete)) //delete
 
 	/*	account.RoleCli = rolePt.NewRoleClient("go.micro.srv.v1.role", client.DefaultClient)

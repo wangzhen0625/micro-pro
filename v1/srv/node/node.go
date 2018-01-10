@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/micro/go-micro"
+	"github.com/satori/go.uuid"
 	"golang.org/x/net/context"
 	"log"
 	nodePt "micro-pro/v1/proto/node"
@@ -30,7 +32,7 @@ type NodeInfo struct {
 	Email      string
 	Gender     string
 	Rank       string
-	Birthday   uint
+	Birthday   time.Time
 	Tel        string
 	MobileTel  string
 	CreatedAt  time.Time
@@ -99,52 +101,91 @@ func (a *Node) NodeChildren(ctx context.Context, req *nodePt.NodeReq, stream nod
 func (a *Node) NodeRead(ctx context.Context, req *nodePt.NodeReq, rsp *nodePt.NodeInfo) error {
 	log.Println(req.Type)
 	if req.Type == "person" {
-		mydb.Where(&nodePt.NodeInfo{Id: req.Guid}).Select("id,login_id,auth_method,type,name,email,state,gender,rank").First(rsp)
+		mydb.Where(&nodePt.NodeInfo{Id: req.Guid}).Select("id,login_id,parent_node,auth_method,type,name,email,state,gender,rank").First(rsp)
 	} else {
-		mydb.Where(&nodePt.NodeInfo{Id: req.Guid}).Select("id,login_id,auth_method,type").First(rsp)
+		mydb.Where(&nodePt.NodeInfo{Id: req.Guid}).Select("id,login_id,parent_node,auth_method,type").First(rsp)
 	}
 	return nil
 }
 
 func (a *Node) NodeSave(ctx context.Context, req *nodePt.NodeInfo, rsp *nodePt.NodeInfo) error {
 	log.Print("NodeSave")
-	var node NodeInfo
-	mydb.Where(&NodeInfo{Id: req.Id}).Select("id,parent_node,type,login_id").First(&node)
-	log.Print(node)
+	//找到相同用户名的数据
+	var count int
+	if err := mydb.Model(&nodePt.NodeInfo{}).Where("login_id = ?", req.LoginId).Count(&count).Error; err != nil {
+		return err
+	}
+	req.Id = uuid.Must(uuid.NewV4()).String()
+	log.Print(count)
+	if count > 0 {
+		return errors.New("Data already exists")
+	}
+
+	data := mydb.Create(req)
+	if data.Error != nil {
+		return data.Error
+	}
+	*rsp = *req
+	return nil
+}
+
+func (a *Node) NodeSignUp(ctx context.Context, req *nodePt.NodeRegister, rsp *nodePt.NodeRegister) error {
+	log.Print("NodeSave")
+	//找到相同用户名的数据
+	var count int
+	if err := mydb.Model(&nodePt.NodeRegister{}).Where("login_id = ?", req.LoginId).Count(&count).Error; err != nil {
+		return err
+	}
+	req.Id = uuid.Must(uuid.NewV4()).String()
+	log.Print(count)
+	if count > 0 {
+		return errors.New("Data already exists")
+	}
+
+	data := mydb.Create(req)
+	if data.Error != nil {
+		return data.Error
+	}
+	*rsp = *req
 	return nil
 }
 
 func (a *Node) NodePatch(ctx context.Context, req *nodePt.NodeInfo, rsp *nodePt.NodeInfo) error {
 	log.Print("NodePatch")
-	var node NodeInfo
-	mydb.Where(&NodeInfo{Id: req.Id}).Select("id,parent_node,type,login_id").First(&node)
-	log.Print(node)
+
+	if err := mydb.Where(&NodeInfo{Id: req.Id}).First(&rsp).Error; err != nil {
+		return err
+	}
+	data := mydb.Model(&rsp).Updates(req)
+	if data.RowsAffected <= 0 {
+		return errors.New("updated nothing")
+	}
+	if data.Error != nil {
+		return data.Error
+	}
 
 	return nil
 }
 
 func (a *Node) NodeDelete(ctx context.Context, req *nodePt.NodeReq, rsp *nodePt.NodeRsp) error {
 	log.Print("NodeDelete")
+	var count int
+	if err := mydb.Model(&NodeInfo{}).Where("parent_node = ?", req.Guid).Count(&count).Error; err != nil {
+		return err
+	}
+	if count > 0 {
+		return errors.New("has children,you should delete children first")
+	}
 
-	num := mydb.Where("id = ?", req.Guid).Delete(&nodePt.NodeInfo{}).RowsAffected
-	log.Print(num)
-	// 检查是否返回RecordNotFound错误
-	/*node := nodePt.NodeInfo{}
-	if mydb.Where("id = ?", req.Guid).First(&node).RecordNotFound() {
-		//数据不存在
-		log.Print("errorrrrr")
-	} else {
-		tx := mydb.Begin()
-		// 注意，一旦你在一个事务中，使用tx作为数据库句柄
+	data := mydb.Where("id = ?", req.Guid).Delete(&nodePt.NodeInfo{})
+	log.Print(data.RowsAffected)
+	if data.RowsAffected <= 0 {
+		return errors.New("deleted nothing")
+	}
+	if data.Error != nil {
+		return data.Error
+	}
 
-		if err := tx.Delete(&node).Error; err != nil {
-			log.Print("errorrrrr")
-			tx.Rollback()
-			return err
-		}
-
-		tx.Commit()
-	}*/
 	return nil
 }
 

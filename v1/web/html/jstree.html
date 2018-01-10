@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" type="text/css" href="../jstree/themes/default/style.css">
+<style> 
+.div-a{ float:left;width:49%;border:1px solid #F00} 
+.div-b{ float:left;width:49%;border:1px solid #000} 
+</style> 
+</head>
+<body>
+	<script type="text/javascript" src="../js/jquery-3.2.1.min.js"></script>
+	<script type="text/javascript" src="../jstree/jstree.min.js"></script>
+
+	<script type="text/javascript" src="../js/common.js"></script>
+	<script type="text/javascript" src="../js/user-tree.js"></script>
+	
+	<div id="UserTree" class="div-a">第一个DIV盒子</div> 
+	<div id="UserInfo" class="div-b">
+	<label>
+	(person)个人
+	(organizationalUnit)组织单元
+	(organization)组织
+	</label>
+	<button id="aaa">qiehuan</button> 
+
+	<label id="show"></label>
+	<form id="formdata">
+		节点id<input type="text" id="id" disabled="disabled"><br>
+		父节点(固定别修改)<input type="text" name="parent_node" id="parent_node" ><br>
+		账号名<input type="text" name="login_id" id="login_id"><br>
+		认证方式<input type="text" name="auth_method" id="auth_method"><br>
+		类型<input type="text" name="type" id="type"><br>
+		<span id="personspan">
+			<span id="person">
+			姓名<input type="text" name="name" id="name"><br>
+			邮箱<input type="text" name="email" id="email"><br>
+			状态<input type="text" name="state" id="state"><br>
+			性别<input type="text" name="gender" id="gender"><br>
+			职位<input type="text" name="rank" id="rank"><br>
+			</span>
+		</span>
+	</form>
+		<button id="tijiao">提交</button> 
+
+	</div> 
+	
+	<script type="text/javascript">
+		$(function(){
+			$("#tijiao").click(function(){
+				// console.log(JSON.stringify($("#formdata").serializeObject()))
+				//var flag = 1;//编辑 1 ，新增 2 
+				if(flag == 1){
+					//编辑
+					wzAjax("PUT",$("#formdata").serializeObject(),ACCOUNT+"/"+selfId,function(data,st){
+						setNode(data.login_id)
+						alert("修改成功")
+
+					});
+				}else if(flag == 2){
+					//新增
+					wzAjax("POST",$("#formdata").serializeObject(),ACCOUNT,function(data,st){
+						createNode(data.type, data.login_id, data.id)
+						alert("新增成功")
+					});
+
+				}else {
+
+				}
+			})
+			$("#aaa").click(function(){
+				if($("#person").length){
+					x=$("#person").detach();
+				}else{
+					$("#personspan").prepend(x);
+				}
+			})
+			createTree("UserTree")
+		})
+
+	$.fn.serializeObject = function() {  
+        var o = {};  
+        var a = this.serializeArray();  
+        $.each(a, function() {  
+            if (o[this.name]) {  
+                if (!o[this.name].push) {  
+                    o[this.name] = [ o[this.name] ];  
+                }  
+                o[this.name].push(this.value || '');  
+            } else {  
+                o[this.name] = this.value || '';  
+            }  
+        });  
+        return o;  
+    }
+	</script>
+</body>
+</html>

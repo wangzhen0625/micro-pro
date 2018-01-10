@@ -171,19 +171,49 @@ db.NewRecord(user) // => 创建`user`后返回`false`
 
 更新：
 Save将包括执行更新SQL时的所有字段，即使它没有更改
-
 // 使用`struct`更新多个属性，只会更新这些更改的和非空白字段
 db.Model(&user).Updates(User{Name: "hello", Age: 18})
 
 // 使用`RowsAffected`获取更新记录计数
 db.Model(User{}).Updates(User{Name: "hello", Age: 18}).RowsAffected
 
-db.Where("age = ?", 20).Delete(&User{}).RowsAffected
+先查询，然后修改
+if err := mydb.Where(&NodeInfo{Id: req.Id}).First(&rsp).Error; err != nil {
+	return err
+}
+data := mydb.Model(&rsp).Updates(req)
+if data.RowsAffected <= 0 {
+	return errors.New("updated nothing")
+}
+if data.Error != nil {
+	return data.Error
+}
+
+
+
+
 
 删除
+db.Where("age = ?", 20).Delete(&User{}).RowsAffected
 
 
+事务
+// 检查是否返回RecordNotFound错误
+node := nodePt.NodeInfo{}
+if mydb.Where("id = ?", req.Guid).First(&node).RecordNotFound() {
+	//数据不存在
+	log.Print("errorrrrr")
+} else {
+	tx := mydb.Begin()
+	// 注意，一旦你在一个事务中，使用tx作为数据库句柄
 
+	if err := tx.Delete(&node).Error; err != nil {
+		log.Print("errorrrrr")
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+}
 
 redis
-

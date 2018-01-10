@@ -1,3 +1,5 @@
+
+
 如果一个名字是在函数内部定义，那么它的就只在函数内部有效。
 如果是在函数外部定义，那么将在当前包的所有文件中都可以访问。
 名字的开头字母的大小写决定了名字在包外的可见性。
@@ -11,3 +13,8 @@ https://kubernetes.io/docs/admin/authentication/#openid-connect-tokens
 
 k8s使用go-rest
 github.com/emicklei/go-restful
+
+通用惟一标识符（UUID）是128位比特的数字，用来惟一地标识因特网上的某些对象或者实体。
+GUID 是微软对UUID这个标准的实现。UUID是由开放软件基金会（OSF）定义的。
+UUID还有其它各种实现，不止GUID一种，其它的在此不详细说明。
+https://github.com/satori/go.uuid

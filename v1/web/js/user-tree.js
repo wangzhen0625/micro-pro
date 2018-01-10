@@ -2,16 +2,12 @@
  * Created by yuan_chunxu on 2016/12/15.
  */
 const ACCOUNT = "http://192.168.74.50:8080/v1/account/nodes"
-$(document).ready(function(){
-    /*
-     $.ajaxSetup({
-     cache: false
-     });
-     */
-
-    createTree();
-
-})
+var x
+var flag = 1;//编辑 1 ，新增 2  删除 3
+var parentId = ""
+var selfId=""
+var parentType = ""
+var selfType=""
 /**
  * 创建用户树
  */
@@ -80,34 +76,19 @@ function createTree(id) {
                     var nodeType = o.type;
                     if (nodeType == "organization") {
                         return {
-                            'createOrganization': {
+                            'create': {
                                 separator_after: true,
-                                label: "添加子公司",
+                                label: "添加子节点",
                                 icon: 'fa fa-group blue',
                                 //_disabled: $node.attr("auth") == "2" && !authority.addUnit,
                                 action: function (data) {
+                                    $("#show").text("新增节点")
                                     //加载添加部门页，ajax动态加载
-                                    fillPageContent("/admin/account/compAdd","subpage", nodeInfo);
-                                }
-                            },
-                            'createOrganizationalUnit': {
-                                separator_after: true,
-                                label: "添加部门",
-                                icon: 'fa fa-group blue',
-                                //_disabled: $node.attr("auth") == "2" && !authority.addUnit,
-                                action: function (data) {
-                                    //加载添加部门页，ajax动态加载
-                                    fillPageContent("/admin/account/deptAdd","subpage", nodeInfo);
-                                }
-                            },
-                            'createUser': {
-                                separator_after: true,
-                                label: "添加用户",
-                                icon: "fa fa-user-plus green",
-                                //_disabled: $node.attr("auth") == "2" && !authority.addPerson,
-                                action: function (data) {
-                                    fillPageContent("/admin/account/userAdd","subpage", nodeInfo);
-                                    //createNode($node.attr("ldap"), $node.attr("uuid"), $node.attr("type"), "person");
+                                    flag = 2
+                                    parentId = o.id
+                                    parentType = o.type
+                                   $('input').val("")
+                                    $("#parent_node").val(o.id)
                                 }
                             },
                             'modify': {
@@ -116,7 +97,10 @@ function createTree(id) {
                                 icon: "fa fa-edit yellow",
                                 //_disabled: $node.attr("auth") == "2" && !authority.updatePerson || nodeType == "root",
                                 action: function (data) {
-                                    fillPageContent("/admin/account/companyEdit","subpage", nodeInfo);
+                                    $("#show").text("编辑节点")
+                                    flag = 1
+                                    selfId = o.id
+                                    selfType = o.type
                                 }
                             },
                             'delete': {//加上引号解决IE兼容问题，delete为关键字
@@ -128,34 +112,29 @@ function createTree(id) {
                                 action: function (data) {
                                     //删除ldap中的节点和数据库中关联记录
                                     if(o.parent != "#"){
-                                        deleteNode(o.type, o.id);
+                                        // deleteNode(o.type, o.id);
+                                         deleteNode(o.type, o.id);
                                     }else {
-                                        dialog.error("不能删除根节点");
+                                        alert("不能删除根节点");
                                     }
-                                    // dialog.deleteQuery("部门",o.id);
                                 }
                             }
                         }
                     }else if (nodeType == "organizationalUnit") {
                         return {
-                            'createOrganizationalUnit': {
+                            'create': {
                                 separator_after: true,
-                                label: "添加部门",
+                                label: "添加",
                                 icon: 'fa fa-group blue',
                                 //_disabled: $node.attr("auth") == "2" && !authority.addUnit,
                                 action: function (data) {
                                     //加载添加部门页，ajax动态加载
-                                    fillPageContent("/admin/account/deptAdd","subpage", nodeInfo);
-                                }
-                            },
-                            'createUser': {
-                                separator_after: true,
-                                label: "添加用户",
-                                icon: "fa fa-user-plus green",
-                                //_disabled: $node.attr("auth") == "2" && !authority.addPerson,
-                                action: function (data) {
-                                    fillPageContent("/admin/account/userAdd","subpage", nodeInfo);
-                                    //createNode($node.attr("ldap"), $node.attr("uuid"), $node.attr("type"), "person");
+                                    $("#show").text("新增节点")
+                                    flag = 2
+                                    parentId = o.id
+                                    parentType = o.type
+                                    $('input').val("")
+                                    $("#parent_node").val(o.id)
                                 }
                             },
                             'modify': {
@@ -164,7 +143,10 @@ function createTree(id) {
                                 icon: "fa fa-edit yellow",
                                 //_disabled: $node.attr("auth") == "2" && !authority.updatePerson || nodeType == "root",
                                 action: function (data) {
-                                    fillPageContent("/admin/account/departmentEditInfo","subpage", nodeInfo);
+                                    $("#show").text("编辑节点")
+                                    flag = 1
+                                    selfId = o.id
+                                    selfType = o.type
                                 }
                             },
                             'delete': {//加上引号解决IE兼容问题，delete为关键字
@@ -174,8 +156,9 @@ function createTree(id) {
                                 //_disabled: $node.attr("auth") == "2" && !authority.deletePerson,
 
                                 action: function (data) {
+                                     deleteNode(o.type, o.id);
                                     //删除ldap中的节点和数据库中关联记录
-                                    deleteNode(o.type, o.id);
+                                    // deleteNode(o.type, o.id);
                                     // dialog.deleteQuery("部门",o.id);
                                 }
                             }
@@ -188,8 +171,10 @@ function createTree(id) {
                                 icon: "fa fa-edit yellow",
                                 //_disabled: $node.attr("auth") == "2" && !authority.updatePerson,
                                 action: function (data) {
-                                    fillPageContent("/admin/account/userEditInfo","subpage", nodeInfo);
-                                    //modifyNode($node.attr("ldap"), $node.attr("uuid"), $node.attr("type"))
+                                      $("#show").text("编辑节点")
+                                        flag=1
+                                        selfId = o.id
+                                        selfType = o.type
                                 }
                             },
                             'delete': {//加上引号解决IE兼容问题，delete为关键字
@@ -278,25 +263,25 @@ function createTree(id) {
 
         })
         .on("click", "a", function (e) {
+             $("#show").text("查看并编辑节点：")
+             flag=1
             //此id包含type和dn
-            nodeType = $(e.target).parents('li').attr('type');
-            nodeInfo = {"id":$(e.target).parents('li').attr('id'),"type":nodeType};
-            console.log(nodeType)
-            console.log(nodeInfo)   
-            if(TYPE_ORGANIZATION == nodeType){
-                // $("#subpage").html("<div>这是 根节点描述</div>");
-                alert(0)
-            }
-            else if(TYPE_ORGANIZATIONALUNIT == nodeType){
-                /*
-                 * 1、先去department.php中填充表单
-                 * 2、再在获取element的时候
-                 * */
-                  alert(1)
-            }
-            else if(TYPE_PERSON == nodeType){
-                alert(2)
-            }
+            var nodeType = $(e.target).parents('li').attr('type');
+            var nodeId = $(e.target).parents('li').attr('id');
+            selfId = nodeId
+            selfType = nodeType
+            var url = ACCOUNT+"/"+nodeId+"?type="+nodeType
+            wzAjax(url,function(data,st){
+                if(TYPE_PERSON == nodeType){
+                    $("#personspan").prepend(x);
+                }else {
+                    x=$("#person").detach();
+                }
+                $.each(data,function(k,v){
+                    $("#"+k).val(v)
+                })
+            })  
+            
         })
         .on('changed.jstree', function (e, data) {
         })
@@ -329,14 +314,13 @@ function createNode(type, displayName, id) {
  * @param dn：节点dn
  * @returns {boolean}
  */
-function setNode(displayName, id, dn)
+function setNode(displayName)
 {
     var ref = $('#UserTree').jstree(true),
         sel = ref.get_selected();
     if(!sel.length) { return false; }
     sel = sel[0];
     ref.rename_node(sel, displayName);
-    $("#"+id).attr("dn", dn);
 }
 
 /**
@@ -349,35 +333,23 @@ function refreshAll()
 }
 
 /**
- * 删除节点
+ * 删除当前选中的节点
  */
-function deleteNode(nodeType, id){
-    dialog.query("是否删除？"
-        ,function () {
-            wzAjax("delete",{"type":nodeType},ACCOUNT+id,function(data,status) {
-                if(!data){
-                    //删除前台的树节点
-                    var ref = $('#UserTree').jstree(true),
-                        sel = ref.get_selected();
+function deleteNode(type,id){
 
-                    if(!sel.length)
-                    {
-                        return false;
-                    }
-                    ref.delete_node(sel);
-                    dialog.success("删除成功")
-                    fillPageContent("/admin/account/index");
-                }else {
-                    //这是try catch的报错
-                    dialog.error(data.message);
-                }
-            });
-        }
-        ,function () {
-            dialog.msg("取消删除！")
-        }
-    );
+    wzAjax("DELETE",{"type":type},ACCOUNT+"/"+id,function(data,st){
+        //删除前台的树节点
+        var ref = $('#UserTree').jstree(true),
+            sel = ref.get_selected();
 
+        if(!sel.length)
+        {
+            return false;
+        }
+        ref.delete_node(sel);
+        alert("删除成功")
+    });
+    
 }
 
 

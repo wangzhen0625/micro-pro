@@ -94,12 +94,13 @@ function wzAjax() {
                 }
             },
             error: function(xhr,st) {
-                console.log(st);
+
+                alert(xhr.responseText)
                 console.log(xhr);
+                console.log(st);
             }
         }
         if(type == "get"){
-            option.contentType = "application/x-www-form-urlencoded";
             option.data = data;
         }
         $.ajax(option);
